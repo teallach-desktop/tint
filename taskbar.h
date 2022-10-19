@@ -11,6 +11,7 @@ public:
     ~Taskbar();
     void addTask(struct zwlr_foreign_toplevel_handle_v1 *);
     void removeTask(Task *task);
+    void updateTaskPositions(void);
     void addForeignToplevelManager(struct wl_registry *, uint32_t name, uint32_t version);
 
 private:

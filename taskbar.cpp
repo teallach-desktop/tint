@@ -94,7 +94,17 @@ void Taskbar::removeTask(Task *task)
         }
         ++i;
     }
-    this->panel()->update();
+    m_panel->update();
+}
+
+void Taskbar::updateTaskPositions(void)
+{
+    const int margin = 10;
+    int x = margin;
+    for (auto &task : m_tasks) {
+        task->moveTo(x, 0);
+        x += task->width() + margin;
+    }
 }
 
 static void handle_toplevel(void *data, struct zwlr_foreign_toplevel_manager_v1 *manager,

@@ -79,10 +79,11 @@ void Panel::paintEvent(QPaintEvent *)
     pen.setColor(QColor("#CCCCCC"));
     painter.setPen(pen);
 
+    m_taskbar->updateTaskPositions();
     size_t num = m_taskbar->numTasks();
     for (auto i = 0; i < num; i++) {
         const auto task = m_taskbar->task(i);
-        const auto rect = QRect(10 + i * 100, 0, 100, 30);
-        painter.drawText(rect, Qt::AlignVCenter, QString::fromStdString(task->app_id()), &r);
+        QString label = QString::fromStdString(task->app_id());
+        painter.drawText(task->rect(), Qt::AlignVCenter, label, &r);
     }
 }

@@ -65,10 +65,16 @@ Task::Task(Panel *panel, Taskbar *taskbar, struct zwlr_foreign_toplevel_handle_v
     : m_panel{ panel }, m_taskbar{ taskbar }, m_handle{ handle }
 {
     zwlr_foreign_toplevel_handle_v1_add_listener(m_handle, &toplevel_handle_impl, this);
+    m_rect = QRect(0, 0, 200, 30);
     m_panel->update();
 }
 
 Task::~Task() { }
+
+void Task::moveTo(int x, int y)
+{
+    m_rect.moveTo(x, y);
+}
 
 void Task::handle_app_id(const char *app_id)
 {
