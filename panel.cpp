@@ -89,7 +89,15 @@ void Panel::paintEvent(QPaintEvent *)
     size_t num = m_taskbar->numTasks();
     for (auto i = 0; i < num; i++) {
         const auto task = m_taskbar->task(i);
+        const auto rect = task->rect();
+
+        // Icon
+        QPoint pos = QPoint(rect.left() + 3, rect.top() + (30 - 22) / 2);
+        painter.drawPixmap(pos, task->icon());
+
+        // Text
         QString label = QString::fromStdString(task->app_id());
-        painter.drawText(task->rect(), Qt::AlignVCenter, label, &r);
+        painter.drawText(QRect(rect.left() + 28, rect.top(), rect.width(), rect.height()),
+                         Qt::AlignVCenter, label, &r);
     }
 }

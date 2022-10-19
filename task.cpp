@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-only
 #include <QMouseEvent>
 #include <QDebug>
+#include <QIcon>
 #include "panel.h"
 #include "taskbar.h"
 #include "task.h"
@@ -90,6 +91,12 @@ void Task::mousePressEvent(QMouseEvent *event)
 void Task::handle_app_id(const char *app_id)
 {
     m_app_id = app_id;
+    QIcon icon = QIcon::fromTheme(QString::fromStdString(m_app_id));
+    if (icon.isNull()) {
+        qDebug() << "no icon for " << app_id;
+        // TODO: Look up the icon name in the .desktop file
+    }
+    m_icon = icon.pixmap(QSize(22, 22));
     m_panel->update();
 }
 

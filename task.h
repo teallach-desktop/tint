@@ -21,6 +21,7 @@ private:
     Panel *m_panel;
     Taskbar *m_taskbar;
     QRect m_rect;
+    QPixmap m_icon;
     struct zwlr_foreign_toplevel_handle_v1 *m_handle;
     std::string m_app_id;
 
@@ -29,4 +30,5 @@ public:
     std::string app_id() const { return m_app_id; }
     int width() const { return m_rect.width(); }
     QRect rect() const { return m_rect; }
+    QPixmap icon() const { return m_icon; }
 };
