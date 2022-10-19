@@ -11,6 +11,8 @@ public:
     ~Task();
 
     void moveTo(int x, int y);
+    void mousePressEvent(QMouseEvent *event);
+
     // Implementation for zwlr_foreign_toplevel_handle_v1_listener signals
     void handle_app_id(const char *app_id);
     void handle_closed(void);

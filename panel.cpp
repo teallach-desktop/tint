@@ -51,10 +51,16 @@ void Panel::addPlugin(Taskbar *taskbar)
 
 void Panel::mousePressEvent(QMouseEvent *event)
 {
-    if (event->button() == Qt::LeftButton)
-        qDebug() << "left click";
-    else if (event->button() == Qt::RightButton)
-        qDebug() << "right click";
+    // Forward the event to the task at the cursor position
+    size_t num = m_taskbar->numTasks();
+    for (auto i = 0; i < num; i++) {
+        auto task = m_taskbar->task(i);
+        const auto rect = task->rect();
+        if (rect.contains(event->pos())) {
+            task->mousePressEvent(event);
+            return;
+        }
+    }
 }
 
 void Panel::paintEvent(QPaintEvent *)

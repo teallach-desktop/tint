@@ -1,4 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0-only
+#include <QMouseEvent>
+#include <QDebug>
 #include "panel.h"
 #include "taskbar.h"
 #include "task.h"
@@ -74,6 +76,15 @@ Task::~Task() { }
 void Task::moveTo(int x, int y)
 {
     m_rect.moveTo(x, y);
+}
+
+void Task::mousePressEvent(QMouseEvent *event)
+{
+    qDebug() << QString::fromStdString(m_app_id);
+    // TODO: Configure task-mouse-press-events
+    // Just maximize for now to prove that it works
+    if (event->button() == Qt::LeftButton)
+        zwlr_foreign_toplevel_handle_v1_set_maximized(m_handle);
 }
 
 void Task::handle_app_id(const char *app_id)
