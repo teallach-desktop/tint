@@ -5,7 +5,7 @@
 #include "panel.h"
 #include "taskbar.h"
 #include "task.h"
-#include "wlr-foreign-toplevel-management-unstable-v1-client-protocol.h"
+#include "wayland-wlr-foreign-toplevel-management-client-protocol.h"
 
 static void handle_title(void *data, struct zwlr_foreign_toplevel_handle_v1 *handle,
                          const char *title)

@@ -7,7 +7,7 @@
 #include "panel.h"
 #include "taskbar.h"
 #include "task.h"
-#include "wlr-foreign-toplevel-management-unstable-v1-client-protocol.h"
+#include "wayland-wlr-foreign-toplevel-management-client-protocol.h"
 
 static void handle_wl_registry_global(void *data, struct wl_registry *registry, uint32_t name,
                                       const char *interface, uint32_t version)

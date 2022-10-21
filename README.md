@@ -10,7 +10,7 @@ Implementation:
 - Talk to [wlr-foreign-toplevel-management] protocol and show open clients
 
 Dependencies:
-- cmake
+- cmake, extra-cmake-modules
 - qt5-{base,wayland}
 - [layer-shell-qt] which is [packaged quite widely]
 

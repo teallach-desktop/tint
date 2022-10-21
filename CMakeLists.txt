@@ -6,21 +6,22 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address -fsanitize=leak -g")
 
 find_package(LayerShellQt REQUIRED)
 
-set(PROTO "wlr-foreign-toplevel-management-unstable-v1")
-add_custom_command(
-	OUTPUT ${PROTO}-protocol.c ${PROTO}-client-protocol.h
-	COMMAND wayland-scanner private-code ../${PROTO}.xml ${PROTO}-protocol.c
-	COMMAND wayland-scanner client-header ../${PROTO}.xml ${PROTO}-client-protocol.h
-	WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+find_package(ECM REQUIRED NO_MODULE)
+set(CMAKE_MODULE_PATH ${ECM_MODULE_PATH})
+find_package (WaylandScanner REQUIRED)
+ecm_add_wayland_client_protocol (
+	WLR_FOREIGN_TOPLEVEL_MANAGEMENT_SRC
+	PROTOCOL wlr-foreign-toplevel-management-unstable-v1.xml
+	BASENAME wlr-foreign-toplevel-management
 )
-include_directories(${CMAKE_CURRENT_BINARY_DIR})
+include_directories(${CMAKE_BINARY_DIR})
 
 add_executable(tint
 	main.cpp
 	panel.cpp panel.h
 	taskbar.cpp taskbar.h
 	task.cpp task.h
-	${PROTO}-protocol.c ${PROTO}-client-protocol.h
+	${WLR_FOREIGN_TOPLEVEL_MANAGEMENT_SRC}
 )
 
 target_link_libraries(tint
