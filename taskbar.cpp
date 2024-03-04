@@ -1,12 +1,14 @@
 // SPDX-License-Identifier: GPL-2.0-only
 #include <QDebug>
+#include <QGuiApplication>
 #include <QTextStream>
-#include <wayland-client.h>
 #include <poll.h>
 #include <pthread.h>
+#include <wayland-client.h>
+#include <qpa/qplatformnativeinterface.h>
 #include "panel.h"
-#include "taskbar.h"
 #include "task.h"
+#include "taskbar.h"
 #include "wayland-wlr-foreign-toplevel-management-client-protocol.h"
 
 static void handle_wl_registry_global(void *data, struct wl_registry *registry, uint32_t name,
@@ -28,56 +30,17 @@ static const struct wl_registry_listener registry_listener_impl = {
     .global_remove = handle_wl_registry_global_remove,
 };
 
-static void *eventloop(void *arg)
-{
-    struct wl_display *wl_display = static_cast<struct wl_display *>(arg);
-    struct pollfd pollfds[] = { {
-            .fd = wl_display_get_fd(wl_display),
-            .events = POLLIN,
-    } };
-    while (true) {
-        int ret = 1;
-        while (ret > 0) {
-            ret = wl_display_dispatch_pending(wl_display);
-            wl_display_flush(wl_display);
-        }
-        if (ret < 0) {
-            qDebug() << "wl_display_dispatch_pending()";
-            break;
-        }
-        if (poll(pollfds, 1, 50) < 0) {
-            if (errno == EINTR)
-                continue;
-            qDebug() << "poll()";
-            break;
-        }
-        if ((pollfds[0].revents & POLLIN) && wl_display_dispatch(wl_display) == -1) {
-            qDebug() << "wl_display_dispatch()";
-            break;
-        }
-        if ((pollfds[0].revents & POLLOUT) && wl_display_flush(wl_display) == -1) {
-            qDebug() << "wl_display_flush()";
-            break;
-        }
-    }
-    return NULL;
-}
-
 Taskbar::Taskbar(Panel *panel) : m_panel{ panel }
 {
     m_panel->addPlugin(this);
 
-    // It's hard to get Qt's wl_display so we just use our own connection in a separate thread
-    m_display = wl_display_connect(NULL);
+    m_display = static_cast<struct wl_display *>(QGuiApplication::platformNativeInterface()
+                        ->nativeResourceForIntegration("wl_display"));
     struct wl_registry *registry = wl_display_get_registry(m_display);
     wl_registry_add_listener(registry, &registry_listener_impl, this);
-    pthread_create(&m_eventLoop, NULL, eventloop, m_display);
 }
 
-Taskbar::~Taskbar()
-{
-    pthread_join(m_eventLoop, NULL);
-}
+Taskbar::~Taskbar() { }
 
 void Taskbar::addTask(struct zwlr_foreign_toplevel_handle_v1 *handle)
 {

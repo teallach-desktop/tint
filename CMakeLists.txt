@@ -28,5 +28,6 @@ target_link_libraries(tint
 	PRIVATE
 	LayerShellQtInterface
 	Qt::Gui
+	Qt::GuiPrivate
 	wayland-client
 )
