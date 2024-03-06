@@ -1,34 +1,37 @@
 // SPDX-License-Identifier: GPL-2.0-only
 #pragma once
+#include <QToolButton>
 
-class Panel;
 class Taskbar;
 
-class Task
+class Task : public QToolButton
 {
 public:
-    Task(Panel *panel, Taskbar *taskbar, struct zwlr_foreign_toplevel_handle_v1 *handle);
+    Task(QWidget *parent, struct zwlr_foreign_toplevel_handle_v1 *handle, struct wl_seat *seat);
     ~Task();
 
-    void moveTo(int x, int y);
-    void mousePressEvent(QMouseEvent *event);
+    enum tint_task_state {
+        TASK_ACTIVE = (1 << 0),
+        TASK_MINIMIZED = (1 << 1),
+    };
 
-    // Implementation for zwlr_foreign_toplevel_handle_v1_listener signals
+    // Foreign toplevel handlers
     void handle_app_id(const char *app_id);
+    void handle_state(struct wl_array *state);
     void handle_closed(void);
 
+protected:
+    void mousePressEvent(QMouseEvent *event) override;
+
 private:
-    Panel *m_panel;
-    Taskbar *m_taskbar;
-    QRect m_rect;
-    QPixmap m_icon;
+    QString getIcon(const char *app_id);
+    struct wl_seat *m_seat;
     struct zwlr_foreign_toplevel_handle_v1 *m_handle;
+    uint32_t m_state;
     std::string m_app_id;
 
 public:
-    // Getters
-    std::string app_id() const { return m_app_id; }
-    int width() const { return m_rect.width(); }
-    QRect rect() const { return m_rect; }
-    QPixmap icon() const { return m_icon; }
+    uint32_t state() const { return m_state; }
+    bool active() const { return m_state & TASK_ACTIVE; }
+    bool minimized() const { return m_state & TASK_MINIMIZED; }
 };

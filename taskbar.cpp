@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-only
 #include <QDebug>
 #include <QGuiApplication>
+#include <QToolButton>
 #include <QTextStream>
 #include <poll.h>
 #include <pthread.h>
@@ -16,6 +17,8 @@ static void handle_wl_registry_global(void *data, struct wl_registry *registry, 
 {
     if (!strcmp(interface, zwlr_foreign_toplevel_manager_v1_interface.name)) {
         static_cast<Taskbar *>(data)->addForeignToplevelManager(registry, name, version);
+    } else if (!strcmp(interface, wl_seat_interface.name)) {
+        static_cast<Taskbar *>(data)->addSeat(registry, name, version);
     }
 }
 
@@ -30,43 +33,43 @@ static const struct wl_registry_listener registry_listener_impl = {
     .global_remove = handle_wl_registry_global_remove,
 };
 
-Taskbar::Taskbar(Panel *panel) : m_panel{ panel }
+Taskbar::Taskbar(QWidget *parent) : QWidget(parent), m_layout(this)
 {
-    m_panel->addPlugin(this);
+    m_layout.setContentsMargins(QMargins(0, 0, 0, 0));
+    m_layout.setSpacing(0);
 
-    m_display = static_cast<struct wl_display *>(QGuiApplication::platformNativeInterface()
-                        ->nativeResourceForIntegration("wl_display"));
+    // Flash up the foreign toplevel interface
+    m_display = static_cast<struct wl_display *>(
+            QGuiApplication::platformNativeInterface()->nativeResourceForIntegration("wl_display"));
     struct wl_registry *registry = wl_display_get_registry(m_display);
     wl_registry_add_listener(registry, &registry_listener_impl, this);
 }
 
-Taskbar::~Taskbar() { }
+Taskbar::~Taskbar()
+{
+    if (m_foreignToplevelManager) {
+        qDebug() << "zwlr_foreign_toplevel_manager_v1_destroy()";
+        zwlr_foreign_toplevel_manager_v1_destroy(m_foreignToplevelManager);
+        m_foreignToplevelManager = nullptr;
+    }
+}
+
+int Taskbar::numTasks(void)
+{
+    int i = 0;
+    foreach (QToolButton *button, m_layout.parentWidget()->findChildren<QToolButton *>()) {
+        ++i;
+    }
+    return i;
+}
 
 void Taskbar::addTask(struct zwlr_foreign_toplevel_handle_v1 *handle)
 {
-    m_tasks.push_back(std::make_unique<Task>(this->panel(), this, handle));
-}
-
-void Taskbar::removeTask(Task *task)
-{
-    int i = 0;
-    for (auto &t : m_tasks) {
-        if (t.get() == task) {
-            m_tasks.erase(m_tasks.begin() + i);
-            break;
-        }
-        ++i;
-    }
-    m_panel->update();
-}
-
-void Taskbar::updateTaskPositions(void)
-{
-    const int margin = 10;
-    int x = margin;
-    for (auto &task : m_tasks) {
-        task->moveTo(x, 0);
-        x += task->width() + margin;
+    // Insert it after the last task, but before the stretch object
+    int index = numTasks();
+    m_layout.insertWidget(index, new Task(this, handle, m_seat), 0, Qt::AlignLeft);
+    if (!index) {
+        m_layout.addStretch();
     }
 }
 
@@ -97,4 +100,14 @@ void Taskbar::addForeignToplevelManager(struct wl_registry *registry, uint32_t n
     }
     zwlr_foreign_toplevel_manager_v1_add_listener(m_foreignToplevelManager, &toplevel_manager_impl,
                                                   this);
+}
+
+void Taskbar::addSeat(struct wl_registry *registry, uint32_t name, uint32_t version)
+{
+    version = std::min<uint32_t>(version, wl_seat_interface.version);
+    m_seat = static_cast<struct wl_seat *>(
+            wl_registry_bind(registry, name, &wl_seat_interface, version));
+    if (!m_seat) {
+        qDebug() << "no wl_seat";
+    }
 }

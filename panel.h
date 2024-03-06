@@ -1,20 +1,25 @@
 // SPDX-License-Identifier: GPL-2.0-only
 #pragma once
-#include <QRasterWindow>
+#include <QMainWindow>
+#include <QHBoxLayout>
 
-class Taskbar;
-
-class Panel : public QRasterWindow
+class Panel : public QMainWindow
 {
 public:
     Panel();
     ~Panel();
-    void addPlugin(Taskbar *taskbar);
-
-private:
-    Taskbar *m_taskbar;
 
 protected:
-    void mousePressEvent(QMouseEvent *event) Q_DECL_OVERRIDE;
-    void paintEvent(QPaintEvent *) Q_DECL_OVERRIDE;
+    void contextMenuEvent(QContextMenuEvent *event) override;
+
+private slots:
+    void exit();
+
+private:
+    QHBoxLayout *m_layout;
+
+    void createActions();
+    QAction *m_fooAct;
+    QAction *m_barAct;
+    QAction *m_exitAct;
 };
