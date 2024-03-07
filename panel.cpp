@@ -33,7 +33,9 @@ Panel::Panel()
     }
     layerShell->setAnchors((LayerShellQt::Window::Anchors)anchors);
 
-    layerShell->setKeyboardInteractivity(LayerShellQt::Window::KeyboardInteractivity(0));
+    const auto interactivity = QMetaEnum::fromType<LayerShellQt::Window::KeyboardInteractivity>();
+    layerShell->setKeyboardInteractivity(LayerShellQt::Window::KeyboardInteractivity(
+            interactivity.keyToValue("KeyboardInteractivityOnDemand")));
 
     setAttribute(Qt::WA_AlwaysShowToolTips);
 
