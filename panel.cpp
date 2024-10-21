@@ -6,6 +6,7 @@
 #include <QMetaEnum>
 #include <LayerShellQt/shell.h>
 #include <LayerShellQt/window.h>
+#include <QtWaylandClient/private/qwayland-xdg-shell.h>
 #include "panel.h"
 #include "taskbar.h"
 
@@ -75,8 +76,22 @@ void Panel::createActions()
 void Panel::contextMenuEvent(QContextMenuEvent *event)
 {
     QMenu menu(this);
+
     menu.addAction(m_fooAct);
     menu.addAction(m_barAct);
     menu.addAction(m_exitAct);
+
+    menu.show();
+    menu.windowHandle()->setProperty("_q_waylandPopupAnchor",
+                                     QVariant::fromValue(Qt::Edge::BottomEdge));
+    menu.windowHandle()->setProperty("_q_waylandPopupGravity",
+                                     QVariant::fromValue(Qt::Edge::BottomEdge));
+    menu.windowHandle()->setProperty(
+            "_q_waylandPopupConstraintAdjustment",
+            static_cast<unsigned int>(QtWayland::xdg_positioner::constraint_adjustment_slide_x
+                                      | QtWayland::xdg_positioner::constraint_adjustment_flip_y));
+    // menu.windowHandle()->setProperty("_q_waylandPopupAnchorRect", geometry());
+    menu.hide();
+
     menu.exec(event->globalPos());
 }
