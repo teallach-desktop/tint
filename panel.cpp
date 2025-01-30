@@ -1,9 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-only
 #include <QApplication>
 #include <QCoreApplication>
-#include <QContextMenuEvent>
 #include <QDebug>
-#include <QMenu>
 #include <QMetaEnum>
 #include <LayerShellQt/shell.h>
 #include <LayerShellQt/window.h>
@@ -11,7 +9,7 @@
 #include "panel.h"
 #include "taskbar.h"
 
-Panel::Panel()
+Panel::Panel(QWidget *parent) : QMainWindow(parent)
 {
     LayerShellQt::Shell::useLayerShell();
     this->winId();
@@ -78,31 +76,7 @@ void Panel::exit()
 
 void Panel::createActions()
 {
-    m_fooAct = new QAction("&Foo", this);
-    m_barAct = new QAction("&Bar", this);
     m_exitAct = new QAction("&Exit", this);
     connect(m_exitAct, &QAction::triggered, this, &Panel::exit);
 }
 
-void Panel::contextMenuEvent(QContextMenuEvent *event)
-{
-    QMenu menu(this);
-
-    menu.addAction(m_fooAct);
-    menu.addAction(m_barAct);
-    menu.addAction(m_exitAct);
-
-    menu.show();
-    menu.windowHandle()->setProperty("_q_waylandPopupAnchor",
-                                     QVariant::fromValue(Qt::Edge::BottomEdge));
-    menu.windowHandle()->setProperty("_q_waylandPopupGravity",
-                                     QVariant::fromValue(Qt::Edge::BottomEdge));
-    menu.windowHandle()->setProperty(
-            "_q_waylandPopupConstraintAdjustment",
-            static_cast<unsigned int>(QtWayland::xdg_positioner::constraint_adjustment_slide_x
-                                      | QtWayland::xdg_positioner::constraint_adjustment_flip_y));
-    // menu.windowHandle()->setProperty("_q_waylandPopupAnchorRect", geometry());
-    menu.hide();
-
-    menu.exec(event->globalPos());
-}

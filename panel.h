@@ -6,11 +6,8 @@
 class Panel : public QMainWindow
 {
 public:
-    Panel();
+    Panel(QWidget *parent = nullptr);
     ~Panel();
-
-protected:
-    void contextMenuEvent(QContextMenuEvent *event) override;
 
 private slots:
     void exit();
@@ -19,7 +16,5 @@ private:
     QHBoxLayout *m_layout;
 
     void createActions();
-    QAction *m_fooAct;
-    QAction *m_barAct;
     QAction *m_exitAct;
 };
