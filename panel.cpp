@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: GPL-2.0-only
+#include <QApplication>
 #include <QCoreApplication>
 #include <QContextMenuEvent>
 #include <QDebug>
@@ -53,8 +54,18 @@ Panel::Panel()
     m_layout->addWidget(new Taskbar(this));
 
     constexpr int height = 32;
-    resize(0, height);
-    qDebug() << "size=" << this->size();
+    QScreen * screen = QApplication::primaryScreen();
+    QRect rect = screen->geometry();
+    for (QScreen *s : screen->virtualSiblings())
+    {
+        // TODO: Add config option to set output
+        qDebug() << "name=" << s->name() << "; geometry=" << s->geometry();
+        rect = s->geometry();
+    }
+    rect.setHeight(0);
+    qDebug() << "geometry=" << rect;
+    setFixedSize(rect.size());
+    setGeometry(rect);
     layerShell->setExclusiveZone(height);
 }
 
