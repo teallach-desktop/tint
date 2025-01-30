@@ -36,7 +36,7 @@ Panel::Panel()
 
     const auto interactivity = QMetaEnum::fromType<LayerShellQt::Window::KeyboardInteractivity>();
     layerShell->setKeyboardInteractivity(LayerShellQt::Window::KeyboardInteractivity(
-            interactivity.keyToValue("KeyboardInteractivityOnDemand")));
+            interactivity.keyToValue("KeyboardInteractivityNone")));
 
     setAttribute(Qt::WA_AlwaysShowToolTips);
 

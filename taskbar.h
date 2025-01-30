@@ -18,5 +18,6 @@ private:
     struct wl_display *m_display;
     QHBoxLayout m_layout;
     struct zwlr_foreign_toplevel_manager_v1 *m_foreignToplevelManager;
+    struct wl_registry *m_registry;
     struct wl_seat *m_seat;
 };

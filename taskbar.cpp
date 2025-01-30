@@ -41,8 +41,8 @@ Taskbar::Taskbar(QWidget *parent) : QWidget(parent), m_layout(this)
     // Flash up the foreign toplevel interface
     m_display = static_cast<struct wl_display *>(
             QGuiApplication::platformNativeInterface()->nativeResourceForIntegration("wl_display"));
-    struct wl_registry *registry = wl_display_get_registry(m_display);
-    wl_registry_add_listener(registry, &registry_listener_impl, this);
+    m_registry = wl_display_get_registry(m_display);
+    wl_registry_add_listener(m_registry, &registry_listener_impl, this);
 }
 
 Taskbar::~Taskbar()
@@ -52,6 +52,8 @@ Taskbar::~Taskbar()
         zwlr_foreign_toplevel_manager_v1_destroy(m_foreignToplevelManager);
         m_foreignToplevelManager = nullptr;
     }
+    wl_seat_destroy(m_seat);
+    wl_registry_destroy(m_registry);
 }
 
 int Taskbar::numTasks(void)
