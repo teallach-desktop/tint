@@ -6,6 +6,7 @@
 #include <LayerShellQt/shell.h>
 #include <LayerShellQt/window.h>
 #include <QtWaylandClient/private/qwayland-xdg-shell.h>
+#include "conf.h"
 #include "panel.h"
 #include "taskbar.h"
 
@@ -45,8 +46,9 @@ Panel::Panel(QWidget *parent) : QMainWindow(parent)
     m_layout = new QHBoxLayout;
     centralWidget->setLayout(m_layout);
 
-    m_layout->setContentsMargins(QMargins(0, 0, 0, 0));
     m_layout->setSpacing(0);
+    m_layout->setContentsMargins(QMargins(conf.pluginMarginLeft, conf.pluginMarginTop,
+        conf.pluginMarginRight, conf.pluginMarginBottom));
 
     createActions();
     m_layout->addWidget(new Taskbar(this));

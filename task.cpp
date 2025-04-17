@@ -4,6 +4,7 @@
 #include <QIcon>
 #include <QMouseEvent>
 #include <QString>
+#include "conf.h"
 #include "panel.h"
 #include "taskbar.h"
 #include "task.h"
@@ -71,8 +72,9 @@ Task::Task(QWidget *parent, struct zwlr_foreign_toplevel_handle_v1 *handle, stru
 {
     zwlr_foreign_toplevel_handle_v1_add_listener(m_handle, &toplevel_handle_impl, this);
     this->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
-    this->setIconSize(QSize(24, 24));
-    this->setFixedSize(120, 32);
+    this->setIconSize(QSize(22, 22));
+    //this->setFixedSize(120, 18);
+    this->setFixedWidth(120);
 }
 
 Task::~Task() { }
@@ -158,6 +160,7 @@ void Task::handle_state(struct wl_array *state)
             break;
         }
     }
+    this->setStyleSheet(confGetPushButtonStyle(m_state));
 }
 
 void Task::handle_closed(void)

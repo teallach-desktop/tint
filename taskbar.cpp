@@ -8,6 +8,7 @@
 #include <wayland-client.h>
 #include <qpa/qplatformnativeinterface.h>
 #include "panel.h"
+#include "conf.h"
 #include "task.h"
 #include "taskbar.h"
 #include "wayland-wlr-foreign-toplevel-management-client-protocol.h"
@@ -70,6 +71,7 @@ void Taskbar::addTask(struct zwlr_foreign_toplevel_handle_v1 *handle)
     // Insert it after the last task, but before the stretch object
     int index = numTasks();
     m_layout.insertWidget(index, new Task(this, handle, m_seat), 0, Qt::AlignLeft);
+    m_layout.setSpacing(conf.taskSpacing);
     if (!index) {
         m_layout.addStretch();
     }

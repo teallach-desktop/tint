@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-only
 #pragma once
 #include <QToolButton>
+#include "conf.h"
 
 class Taskbar;
 
@@ -9,11 +10,6 @@ class Task : public QToolButton
 public:
     Task(QWidget *parent, struct zwlr_foreign_toplevel_handle_v1 *handle, struct wl_seat *seat);
     ~Task();
-
-    enum tint_task_state {
-        TASK_ACTIVE = (1 << 0),
-        TASK_MINIMIZED = (1 << 1),
-    };
 
     // Foreign toplevel handlers
     void handle_app_id(const char *app_id);

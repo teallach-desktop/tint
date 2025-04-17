@@ -19,6 +19,7 @@ include_directories(${CMAKE_BINARY_DIR})
 
 add_executable(tint
 	main.cpp
+	conf.cpp conf.h
 	panel.cpp panel.h
 	taskbar.cpp taskbar.h
 	task.cpp task.h
