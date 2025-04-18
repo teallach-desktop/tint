@@ -1,13 +1,12 @@
 // SPDX-License-Identifier: GPL-2.0-only
 #pragma once
 
-class Task;
-
 class Taskbar : public QWidget
 {
 public:
     Taskbar(QWidget *parent);
     ~Taskbar();
+
     int numTasks(void);
     void addTask(struct zwlr_foreign_toplevel_handle_v1 *);
 

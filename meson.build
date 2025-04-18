@@ -24,7 +24,6 @@ srcs = [
   'main.cpp',
   'panel.cpp',
   'taskbar.cpp',
-  'task.cpp',
 ]
 
 deps = [
