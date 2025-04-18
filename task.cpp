@@ -8,7 +8,7 @@
 #include "panel.h"
 #include "taskbar.h"
 #include "task.h"
-#include "wayland-wlr-foreign-toplevel-management-client-protocol.h"
+#include "wlr-foreign-toplevel-management-unstable-v1.h"
 
 static void handle_title(void *data, struct zwlr_foreign_toplevel_handle_v1 *handle,
                          const char *title)
@@ -68,8 +68,10 @@ static const struct zwlr_foreign_toplevel_handle_v1_listener toplevel_handle_imp
 };
 
 Task::Task(QWidget *parent, struct zwlr_foreign_toplevel_handle_v1 *handle, struct wl_seat *seat)
-    : QToolButton(parent), m_handle{ handle }, m_seat{ seat }, m_state{ 0 }
+    : QToolButton(parent), m_state{0}
 {
+    m_handle = handle;
+    m_seat = seat;
     zwlr_foreign_toplevel_handle_v1_add_listener(m_handle, &toplevel_handle_impl, this);
     this->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
     this->setIconSize(QSize(22, 22));

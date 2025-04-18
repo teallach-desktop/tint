@@ -11,7 +11,7 @@
 #include "conf.h"
 #include "task.h"
 #include "taskbar.h"
-#include "wayland-wlr-foreign-toplevel-management-client-protocol.h"
+#include "wlr-foreign-toplevel-management-unstable-v1.h"
 
 static void handle_wl_registry_global(void *data, struct wl_registry *registry, uint32_t name,
                                       const char *interface, uint32_t version)
@@ -61,6 +61,7 @@ int Taskbar::numTasks(void)
 {
     int i = 0;
     foreach (QToolButton *button, m_layout.parentWidget()->findChildren<QToolButton *>()) {
+        (void)button;
         ++i;
     }
     return i;
