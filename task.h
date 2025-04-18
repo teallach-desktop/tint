@@ -11,11 +11,6 @@ public:
     Task(QWidget *parent, struct zwlr_foreign_toplevel_handle_v1 *handle, struct wl_seat *seat);
     ~Task();
 
-    // Foreign toplevel handlers
-    void handle_app_id(const char *app_id);
-    void handle_state(struct wl_array *state);
-    void handle_closed(void);
-
 protected:
     void mousePressEvent(QMouseEvent *event) override;
 
