@@ -30,4 +30,3 @@ void confInit();
 
 QString confGetAppStyle(void);
 QString confGetPushButtonStyle(uint32_t state);
-

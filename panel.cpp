@@ -48,16 +48,15 @@ Panel::Panel(QWidget *parent) : QMainWindow(parent)
 
     m_layout->setSpacing(0);
     m_layout->setContentsMargins(QMargins(conf.pluginMarginLeft, conf.pluginMarginTop,
-        conf.pluginMarginRight, conf.pluginMarginBottom));
+                                          conf.pluginMarginRight, conf.pluginMarginBottom));
 
     createActions();
     m_layout->addWidget(new Taskbar(this));
 
     constexpr int height = 32;
-    QScreen * screen = QApplication::primaryScreen();
+    QScreen *screen = QApplication::primaryScreen();
     QRect rect = screen->geometry();
-    for (QScreen *s : screen->virtualSiblings())
-    {
+    for (QScreen *s : screen->virtualSiblings()) {
         // TODO: Add config option to set output
         qDebug() << "name=" << s->name() << "; geometry=" << s->geometry();
         rect = s->geometry();
@@ -81,4 +80,3 @@ void Panel::createActions()
     m_exitAct = new QAction("&Exit", this);
     connect(m_exitAct, &QAction::triggered, this, &Panel::exit);
 }
-

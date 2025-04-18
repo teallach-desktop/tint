@@ -68,14 +68,14 @@ static const struct zwlr_foreign_toplevel_handle_v1_listener toplevel_handle_imp
 };
 
 Task::Task(QWidget *parent, struct zwlr_foreign_toplevel_handle_v1 *handle, struct wl_seat *seat)
-    : QToolButton(parent), m_state{0}
+    : QToolButton(parent), m_state{ 0 }
 {
     m_handle = handle;
     m_seat = seat;
     zwlr_foreign_toplevel_handle_v1_add_listener(m_handle, &toplevel_handle_impl, this);
     this->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
     this->setIconSize(QSize(22, 22));
-    //this->setFixedSize(120, 18);
+    // this->setFixedSize(120, 18);
     this->setFixedWidth(120);
 }
 
