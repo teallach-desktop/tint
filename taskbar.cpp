@@ -112,7 +112,10 @@ Task::Task(QWidget *parent, struct zwlr_foreign_toplevel_handle_v1 *handle, stru
     this->setFixedWidth(120);
 }
 
-Task::~Task() { }
+Task::~Task()
+{
+    zwlr_foreign_toplevel_handle_v1_destroy(m_handle);
+}
 
 void Task::mousePressEvent(QMouseEvent *event)
 {
@@ -127,6 +130,9 @@ void Task::mousePressEvent(QMouseEvent *event)
         } else {
             zwlr_foreign_toplevel_handle_v1_activate(m_handle, m_seat);
         }
+    }
+    if (event->button() == Qt::RightButton) {
+        QCoreApplication::quit();
     }
 }
 

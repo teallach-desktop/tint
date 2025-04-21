@@ -22,6 +22,9 @@ struct conf {
 
     /* Taskbar */
     int taskSpacing;
+
+    /* General */
+    QString output;
 };
 
 extern conf conf;

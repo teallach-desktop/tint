@@ -56,13 +56,17 @@ Panel::Panel(QWidget *parent) : QMainWindow(parent)
     constexpr int height = 32;
     QScreen *screen = QApplication::primaryScreen();
     QRect rect = screen->geometry();
+    QString outputName;
     for (QScreen *s : screen->virtualSiblings()) {
-        // TODO: Add config option to set output
-        qDebug() << "name=" << s->name() << "; geometry=" << s->geometry();
+        outputName = s->name();
+        qDebug() << "name=" << outputName << "; geometry=" << s->geometry();
         rect = s->geometry();
+        if (outputName == conf.output) {
+            break;
+        }
     }
     rect.setHeight(0);
-    qDebug() << "geometry=" << rect;
+    qDebug() << "Using output " << outputName;
     setFixedSize(rect.size());
     setGeometry(rect);
     layerShell->setExclusiveZone(height);
