@@ -1,7 +1,10 @@
 // SPDX-License-Identifier: GPL-2.0-only
 #include <QDebug>
 #include <QDirIterator>
+#include <QGraphicsItem>
 #include <QGuiApplication>
+#include <QGraphicsScene>
+#include <QGraphicsSceneMouseEvent>
 #include <QIcon>
 #include <QMouseEvent>
 #include <QString>
@@ -14,51 +17,61 @@
 #include "panel.h"
 #include "conf.h"
 #include "taskbar.h"
+#include "item-type.h"
 #include "wlr-foreign-toplevel-management-unstable-v1.h"
 
-class Task : public QToolButton
+class Task : public QGraphicsItem
 {
 public:
     Task(QWidget *parent, struct zwlr_foreign_toplevel_handle_v1 *handle, struct wl_seat *seat);
     ~Task();
 
+    enum { Type = UserType + PANEL_TYPE_TASK };
+    int type() const override { return Type; }
+
+    QRectF boundingRect() const Q_DECL_OVERRIDE;
+    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
+               QWidget *widget) Q_DECL_OVERRIDE;
+
 protected:
-    void mousePressEvent(QMouseEvent *event) override;
+    void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event) override;
+    void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
+    void mouseReleaseEvent(QGraphicsSceneMouseEvent *event) override;
+    void hoverEnterEvent(QGraphicsSceneHoverEvent *) override;
+    void hoverLeaveEvent(QGraphicsSceneHoverEvent *) override;
 
 private:
     QString getIcon(const char *app_id);
     struct wl_seat *m_seat;
     struct zwlr_foreign_toplevel_handle_v1 *m_handle;
     uint32_t m_state;
+    Taskbar *m_taskbar;
     std::string m_app_id;
-
-public:
-    bool active() const { return m_state & TASK_ACTIVE; }
-    bool minimized() const { return m_state & TASK_MINIMIZED; }
 };
 
 Task::Task(QWidget *parent, struct zwlr_foreign_toplevel_handle_v1 *handle, struct wl_seat *seat)
-    : QToolButton(parent), m_state{ 0 }
+    : m_state{ 0 }
 {
     m_handle = handle;
     m_seat = seat;
+    m_taskbar = static_cast<Taskbar *>(parent);
+
+    setAcceptHoverEvents(true);
 
     static const zwlr_foreign_toplevel_handle_v1_listener toplevel_handle_impl = {
         .title =
                 [](void *data, zwlr_foreign_toplevel_handle_v1 *handle, const char *title) {
-                    static_cast<Task *>(data)->setText(QString(title).replace("&", "&&"));
+                    // static_cast<Task *>(data)->setText(QString(title).replace("&", "&&"));
                 },
         .app_id =
                 [](void *data, zwlr_foreign_toplevel_handle_v1 *handle, const char *app_id) {
                     auto self = static_cast<Task *>(data);
                     self->m_app_id = app_id;
-                    self->setText(app_id);
-                    self->setToolTip(app_id);
-                    QIcon icon = QIcon::fromTheme(self->getIcon(app_id));
-                    if (icon.isNull()) {
-                        qDebug() << "no icon for " << app_id;
-                    }
-                    self->setIcon(icon);
+                    // QIcon icon = QIcon::fromTheme(self->getIcon(app_id));
+                    // if (icon.isNull()) {
+                    //     qDebug() << "no icon for " << app_id;
+                    //  }
+                    // self->update();
                 },
         .output_enter =
                 [](void *data, zwlr_foreign_toplevel_handle_v1 *handle, wl_output *output) {
@@ -85,7 +98,6 @@ Task::Task(QWidget *parent, struct zwlr_foreign_toplevel_handle_v1 *handle, stru
                             break;
                         }
                     }
-                    self->setStyleSheet(confGetPushButtonStyle(self->m_state));
                 },
         .done =
                 [](void *data, zwlr_foreign_toplevel_handle_v1 *handle) {
@@ -94,9 +106,11 @@ Task::Task(QWidget *parent, struct zwlr_foreign_toplevel_handle_v1 *handle, stru
         .closed =
                 [](void *data, zwlr_foreign_toplevel_handle_v1 *handle) {
                     auto self = static_cast<Task *>(data);
+                    auto taskbar = self->m_taskbar;
                     zwlr_foreign_toplevel_handle_v1_destroy(self->m_handle);
                     self->m_handle = nullptr;
                     delete (self);
+                    taskbar->updateTasks();
                 },
         .parent =
                 [](void *data, zwlr_foreign_toplevel_handle_v1 *handle,
@@ -106,34 +120,96 @@ Task::Task(QWidget *parent, struct zwlr_foreign_toplevel_handle_v1 *handle, stru
     };
 
     zwlr_foreign_toplevel_handle_v1_add_listener(m_handle, &toplevel_handle_impl, this);
-    this->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
-    this->setIconSize(QSize(22, 22));
-    // this->setFixedSize(120, 18);
-    this->setFixedWidth(120);
 }
 
 Task::~Task()
 {
-    zwlr_foreign_toplevel_handle_v1_destroy(m_handle);
+    if (m_handle) {
+        zwlr_foreign_toplevel_handle_v1_destroy(m_handle);
+    }
 }
 
-void Task::mousePressEvent(QMouseEvent *event)
-{
-    qDebug() << QString::fromStdString(m_app_id);
+#define PANEL_HEIGHT 32
+#define ITEM_HEIGHT 30.0
+#define ITEM_WIDTH 80.0
+#define ITEM_MARGIN_X 2
+#define ITEM_MARGIN_Y 2
+#define ITEM_SPACING 2
 
+QRectF Task::boundingRect() const
+{
+    return QRectF(0.5 + ITEM_MARGIN_X, 0.5 + ITEM_MARGIN_Y, ITEM_WIDTH - 1.0 - 2.0 * ITEM_MARGIN_X,
+                  ITEM_HEIGHT - 1.0 - 2.0 * ITEM_MARGIN_Y);
+}
+
+void Task::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *)
+{
+    painter->setRenderHint(QPainter::Antialiasing, true);
+
+    // Panel border
+    QPen pen(QColor("#8f8f91"));
+    pen.setStyle(Qt::SolidLine);
+    pen.setWidth(1.0);
+    painter->setPen(pen);
+    painter->setBrush(QColor("#aaaaaa"));
+    QPainterPath path;
+    path.addRoundedRect(boundingRect(), 4, 4);
+    painter->drawPath(path);
+
+    // Text
+    QFont font;
+    // font.setFamily(font.defaultFamily());
+    font.setFamily("sans");
+    font.setPointSize(10);
+    painter->setFont(font);
+    painter->setPen(QColor("#000000"));
+    QRectF rect = boundingRect().adjusted(3, 0, -6, 0);
+    QFontMetrics metrics(font);
+    QString editedText =
+            metrics.elidedText(QString::fromStdString(m_app_id), Qt::ElideRight, rect.width());
+    painter->drawText(rect, Qt::AlignLeft | Qt::AlignVCenter, editedText);
+
+    // TODO: Not right place - so just temporary hack
+    update();
+}
+
+void Task::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
+{
+    /* TODO: just temporarily to get ASAN output */
+    QCoreApplication::quit();
+}
+
+void Task::mousePressEvent(QGraphicsSceneMouseEvent *event)
+{
     // Traditional minimize-raise action
     if (event->button() == Qt::LeftButton) {
-        if (minimized()) {
+        if (m_state & TASK_MINIMIZED) {
             zwlr_foreign_toplevel_handle_v1_unset_minimized(m_handle);
-        } else if (active()) {
+        } else if (m_state & TASK_ACTIVE) {
             zwlr_foreign_toplevel_handle_v1_set_minimized(m_handle);
         } else {
             zwlr_foreign_toplevel_handle_v1_activate(m_handle, m_seat);
         }
     }
-    if (event->button() == Qt::RightButton) {
-        QCoreApplication::quit();
-    }
+
+    update();
+    QGraphicsItem::mousePressEvent(event);
+}
+
+void Task::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
+{
+    update();
+    QGraphicsItem::mouseReleaseEvent(event);
+}
+
+void Task::hoverEnterEvent(QGraphicsSceneHoverEvent *)
+{
+    update();
+}
+
+void Task::hoverLeaveEvent(QGraphicsSceneHoverEvent *)
+{
+    update();
 }
 
 // Not the prettiest, but just to get a simple prototype going
@@ -194,11 +270,9 @@ static const struct wl_registry_listener registry_listener_impl = {
     .global_remove = handle_wl_registry_global_remove,
 };
 
-Taskbar::Taskbar(QWidget *parent) : QWidget(parent), m_layout(this)
+Taskbar::Taskbar(QWidget *parent, QGraphicsScene *scene, QGraphicsView *view)
+    : QWidget(parent), m_scene{ scene }
 {
-    m_layout.setContentsMargins(QMargins(0, 0, 0, 0));
-    m_layout.setSpacing(0);
-
     // Flash up the foreign toplevel interface
     m_display = static_cast<struct wl_display *>(
             QGuiApplication::platformNativeInterface()->nativeResourceForIntegration("wl_display"));
@@ -209,7 +283,6 @@ Taskbar::Taskbar(QWidget *parent) : QWidget(parent), m_layout(this)
 Taskbar::~Taskbar()
 {
     if (m_foreignToplevelManager) {
-        qDebug() << "zwlr_foreign_toplevel_manager_v1_destroy()";
         zwlr_foreign_toplevel_manager_v1_destroy(m_foreignToplevelManager);
         m_foreignToplevelManager = nullptr;
     }
@@ -217,24 +290,23 @@ Taskbar::~Taskbar()
     wl_registry_destroy(m_registry);
 }
 
-int Taskbar::numTasks(void)
-{
-    int i = 0;
-    foreach (QToolButton *button, m_layout.parentWidget()->findChildren<QToolButton *>()) {
-        (void)button;
-        ++i;
-    }
-    return i;
-}
-
 void Taskbar::addTask(struct zwlr_foreign_toplevel_handle_v1 *handle)
 {
-    // Insert it after the last task, but before the stretch object
-    int index = numTasks();
-    m_layout.insertWidget(index, new Task(this, handle, m_seat), 0, Qt::AlignLeft);
-    m_layout.setSpacing(conf.taskSpacing);
-    if (!index) {
-        m_layout.addStretch();
+    m_scene->addItem(new Task(this, handle, m_seat));
+    updateTasks();
+}
+
+void Taskbar::updateTasks(void)
+{
+    int i = 0;
+    foreach (QGraphicsItem *item, m_scene->items()) {
+        if (Task *p = qgraphicsitem_cast<Task *>(item)) {
+            int margin = (PANEL_HEIGHT - ITEM_HEIGHT) / 2;
+            int y = margin;
+            int x = margin + i * (ITEM_WIDTH + ITEM_SPACING);
+            p->setPos(x, y);
+            i++;
+        }
     }
 }
 
