@@ -21,8 +21,6 @@ int main(int argc, char **argv)
     confInit();
     conf.output = parser.value(outputOption);
 
-    app.setStyleSheet(confGetAppStyle());
-
     Panel panel;
     panel.show();
     return app.exec();

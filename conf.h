@@ -30,6 +30,3 @@ struct conf {
 extern conf conf;
 
 void confInit();
-
-QString confGetAppStyle(void);
-QString confGetPushButtonStyle(uint32_t state);
