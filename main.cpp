@@ -19,7 +19,7 @@ int main(int argc, char **argv)
     parser.process(app);
 
     confInit();
-    conf.output = parser.value(outputOption);
+    confSetOutput(parser.value(outputOption));
 
     Panel panel;
     panel.show();

@@ -30,3 +30,4 @@ struct conf {
 extern conf conf;
 
 void confInit();
+void confSetOutput(QString output);

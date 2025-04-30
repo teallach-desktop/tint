@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: GPL-2.0-only
-#include <QTextStream>
 #include "conf.h"
 
 struct conf conf = { 0 };
 
 void confInit(void)
 {
+
     conf.panelBg = "cecece";
     conf.taskActiveBg = "dadbde";
     conf.taskInactiveBg = "cecece";
@@ -19,3 +19,7 @@ void confInit(void)
     conf.taskSpacing = 2;
 }
 
+void confSetOutput(QString output)
+{
+    conf.output = output;
+}
