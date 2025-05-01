@@ -150,8 +150,14 @@ void Task::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *)
     QPen pen(QColor("#8f8f91"));
     pen.setStyle(Qt::SolidLine);
     pen.setWidth(1.0);
-    painter->setPen(pen);
-    painter->setBrush(QColor("#aaaaaa"));
+
+    if (m_state & TASK_ACTIVE) {
+        painter->setPen(pen);
+        painter->setBrush(QColor("#dadbde"));
+    } else {
+        painter->setPen(Qt::NoPen);
+        painter->setBrush(QColor("#cecece"));
+    }
     QPainterPath path;
     path.addRoundedRect(boundingRect(), 4, 4);
     painter->drawPath(path);
@@ -159,8 +165,8 @@ void Task::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *)
     // Text
     QFont font;
     // font.setFamily(font.defaultFamily());
-    font.setFamily("sans");
-    font.setPointSize(10);
+    font.setFamily("Sans");
+    font.setPointSize(9);
     painter->setFont(font);
     painter->setPen(QColor("#000000"));
     QRectF rect = boundingRect().adjusted(3, 0, -6, 0);
