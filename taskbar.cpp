@@ -255,27 +255,6 @@ QString Task::getIcon(const char *app_id)
     return nullptr;
 }
 
-static void handle_wl_registry_global(void *data, struct wl_registry *registry, uint32_t name,
-                                      const char *interface, uint32_t version)
-{
-    if (!strcmp(interface, zwlr_foreign_toplevel_manager_v1_interface.name)) {
-        static_cast<Taskbar *>(data)->addForeignToplevelManager(registry, name, version);
-    } else if (!strcmp(interface, wl_seat_interface.name)) {
-        static_cast<Taskbar *>(data)->addSeat(registry, name, version);
-    }
-}
-
-static void handle_wl_registry_global_remove(void *data, struct wl_registry *registry,
-                                             uint32_t name)
-{
-    // nop
-}
-
-static const struct wl_registry_listener registry_listener_impl = {
-    .global = handle_wl_registry_global,
-    .global_remove = handle_wl_registry_global_remove,
-};
-
 Taskbar::Taskbar(QWidget *parent, QGraphicsScene *scene, QGraphicsView *view)
     : QWidget(parent), m_scene{ scene }
 {
@@ -283,6 +262,24 @@ Taskbar::Taskbar(QWidget *parent, QGraphicsScene *scene, QGraphicsView *view)
     m_display = static_cast<struct wl_display *>(
             QGuiApplication::platformNativeInterface()->nativeResourceForIntegration("wl_display"));
     m_registry = wl_display_get_registry(m_display);
+
+    static const wl_registry_listener registry_listener_impl = {
+        .global =
+                [](void *data, wl_registry *registry, uint32_t name, const char *interface,
+                   uint32_t version) {
+                    auto self = static_cast<Taskbar *>(data);
+                    if (!strcmp(interface, zwlr_foreign_toplevel_manager_v1_interface.name)) {
+                        self->addForeignToplevelManager(registry, name, version);
+                    } else if (!strcmp(interface, wl_seat_interface.name)) {
+                        self->addSeat(registry, name, version);
+                    }
+                },
+        .global_remove =
+                [](void *data, wl_registry *registry, uint32_t name) {
+                    /* no-op */
+                }
+    };
+
     wl_registry_add_listener(m_registry, &registry_listener_impl, this);
 }
 
@@ -316,22 +313,6 @@ void Taskbar::updateTasks(void)
     }
 }
 
-static void handle_toplevel(void *data, struct zwlr_foreign_toplevel_manager_v1 *manager,
-                            struct zwlr_foreign_toplevel_handle_v1 *handle)
-{
-    static_cast<Taskbar *>(data)->addTask(handle);
-}
-
-static void handle_finished(void *data, struct zwlr_foreign_toplevel_manager_v1 *manager)
-{
-    // nop
-}
-
-static const struct zwlr_foreign_toplevel_manager_v1_listener toplevel_manager_impl = {
-    .toplevel = handle_toplevel,
-    .finished = handle_finished,
-};
-
 void Taskbar::addForeignToplevelManager(struct wl_registry *registry, uint32_t name,
                                         uint32_t version)
 {
@@ -341,6 +322,19 @@ void Taskbar::addForeignToplevelManager(struct wl_registry *registry, uint32_t n
         qDebug() << "foreign-toplevel-management protocol not supported by compositor";
         return;
     }
+
+    static const zwlr_foreign_toplevel_manager_v1_listener toplevel_manager_impl = {
+        .toplevel =
+                [](void *data, zwlr_foreign_toplevel_manager_v1 *manager,
+                   zwlr_foreign_toplevel_handle_v1 *handle) {
+                    static_cast<Taskbar *>(data)->addTask(handle);
+                },
+        .finished =
+                [](void *data, zwlr_foreign_toplevel_manager_v1 *manager) {
+                    /* no-op */
+                },
+    };
+
     zwlr_foreign_toplevel_manager_v1_add_listener(m_foreignToplevelManager, &toplevel_manager_impl,
                                                   this);
 }
