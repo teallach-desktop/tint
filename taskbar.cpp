@@ -47,6 +47,7 @@ private:
     uint32_t m_state;
     Taskbar *m_taskbar;
     std::string m_app_id;
+    bool m_hover;
 };
 
 Task::Task(QWidget *parent, struct zwlr_foreign_toplevel_handle_v1 *handle, struct wl_seat *seat)
@@ -55,6 +56,7 @@ Task::Task(QWidget *parent, struct zwlr_foreign_toplevel_handle_v1 *handle, stru
     m_handle = handle;
     m_seat = seat;
     m_taskbar = static_cast<Taskbar *>(parent);
+    m_hover = false;
 
     setAcceptHoverEvents(true);
 
@@ -155,7 +157,7 @@ void Task::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *)
         painter->setPen(pen);
         painter->setBrush(QColor("#dadbde"));
     } else {
-        painter->setPen(Qt::NoPen);
+        painter->setPen(m_hover ? pen : Qt::NoPen);
         painter->setBrush(QColor("#cecece"));
     }
     QPainterPath path;
@@ -210,11 +212,13 @@ void Task::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 
 void Task::hoverEnterEvent(QGraphicsSceneHoverEvent *)
 {
+    m_hover = true;
     update();
 }
 
 void Task::hoverLeaveEvent(QGraphicsSceneHoverEvent *)
 {
+    m_hover = false;
     update();
 }
 
