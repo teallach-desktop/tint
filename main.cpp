@@ -14,11 +14,17 @@ int main(int argc, char **argv)
     parser.setApplicationDescription("A panel of beauty");
     parser.addHelpOption();
     parser.addVersionOption();
+
     QCommandLineOption outputOption(QStringList() << "o" << "output", "Output to use", "output");
     parser.addOption(outputOption);
+
+    QCommandLineOption configOption(QStringList() << "c" << "config", "Config file to use",
+                                    "filename");
+    parser.addOption(configOption);
+
     parser.process(app);
 
-    confInit();
+    confInit(parser.value(configOption));
     confSetOutput(parser.value(outputOption));
 
     Panel panel;

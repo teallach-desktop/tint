@@ -1,0 +1,21 @@
+# Background 1: Panel
+rounded = 0
+background_color = #cecece 100
+
+# Background 2: Inactive Task
+rounded = 4
+background_color = #cecece 100
+
+# Background 3: Active task
+rounded = 4
+background_color = #dadbde 100
+# conf.taskActiveBorder = "8f8f91";
+
+# Panel
+panel_items = LTSC
+panel_background_id = 1
+
+# Task
+task_background_id = 2
+task_active_background_id = 3
+

@@ -1,4 +1,9 @@
-project('tint', ['c', 'cpp'], version: '0.0.0')
+project(
+  'tint',
+  ['c', 'cpp'],
+  version: '0.0.0',
+  default_options: ['c_std=c11', 'cpp_std=c++23'],
+)
 
 qt6 = import('qt6')
 

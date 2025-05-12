@@ -46,7 +46,7 @@ QRectF BackgroundItem::boundingRect() const
 void BackgroundItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *)
 {
     // Panel background
-    painter->setBrush(QColor("#cecece"));
+    painter->setBrush(conf.backgrounds.at(conf.panel_background_id)->background_color);
     painter->setPen(QColor("#000000"));
     painter->drawRect(boundingRect());
 

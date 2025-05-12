@@ -8,6 +8,9 @@ Pursuing beauty.
 
 A panel inspired by tint2.
 
+Try with:
+- https://github.com/addy-dclxvi/tint2-theme-collections
+
 ## Dependencies
 
 - meson, ninja, cmake

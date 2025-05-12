@@ -155,10 +155,10 @@ void Task::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *)
 
     if (m_state & TASK_ACTIVE) {
         painter->setPen(pen);
-        painter->setBrush(QColor("#dadbde"));
+        painter->setBrush(conf.backgrounds.at(conf.task_active_background_id)->background_color);
     } else {
         painter->setPen(m_hover ? pen : Qt::NoPen);
-        painter->setBrush(QColor("#cecece"));
+        painter->setBrush(conf.backgrounds.at(conf.task_background_id)->background_color);
     }
     QPainterPath path;
     path.addRoundedRect(boundingRect(), 4, 4);
