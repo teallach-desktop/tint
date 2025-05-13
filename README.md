@@ -16,8 +16,10 @@ Try with:
 - meson, ninja, cmake
 - qt6-base, qt6-wayland
 - [layer-shell-qt]
+- [wlr-protocols]
 
 [layer-shell-qt]: https://invent.kde.org/plasma/layer-shell-qt
+[wlr-protocols]: https://repology.org/project/wlr-protocols/versions
 
 ## Build
 

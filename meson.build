@@ -7,6 +7,9 @@ project(
 
 qt6 = import('qt6')
 
+wlr_protocols = dependency('wlr-protocols')
+wlr_protocol_dir = wlr_protocols.get_variable('pkgdatadir')
+
 wayland_scanner = find_program('wayland-scanner')
 wayland_scanner_c = generator(
   wayland_scanner,
@@ -19,8 +22,8 @@ wayland_scanner_h = generator(
   arguments: ['client-header', '@INPUT@', '@OUTPUT@'],
 )
 protos = [
-  wayland_scanner_c.process('wlr-foreign-toplevel-management-unstable-v1.xml'),
-  wayland_scanner_h.process('wlr-foreign-toplevel-management-unstable-v1.xml'),
+  wayland_scanner_c.process(wlr_protocol_dir / 'unstable/wlr-foreign-toplevel-management-unstable-v1.xml'),
+  wayland_scanner_h.process(wlr_protocol_dir / 'unstable/wlr-foreign-toplevel-management-unstable-v1.xml'),
 ]
 
 srcs = [
