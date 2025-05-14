@@ -13,6 +13,7 @@ background_color = #dadbde 100
 
 # Panel
 panel_items = LTSC
+panel_size = _ 30
 panel_background_id = 1
 
 # Task

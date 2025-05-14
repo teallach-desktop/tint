@@ -80,7 +80,7 @@ View::View(QRect screenGeometry, QWidget *parent) : QGraphicsView(parent)
     qDebug() << "screenGeometry=" << screenGeometry;
 
     int width = screenGeometry.width();
-    int height = 32;
+    int height = conf.panel_height;
 
     m_scene.setSceneRect(0, 0, width, height);
     m_scene.setItemIndexMethod(QGraphicsScene::NoIndex);
@@ -144,7 +144,6 @@ Panel::Panel(QWidget *parent) : QMainWindow(parent)
     setAttribute(Qt::WA_AlwaysShowToolTips);
     setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
 
-    constexpr int height = 32;
     QScreen *screen = QApplication::primaryScreen();
     QRect screenGeometry = screen->geometry();
     QString outputName;
@@ -159,7 +158,7 @@ Panel::Panel(QWidget *parent) : QMainWindow(parent)
     qDebug() << "Using output " << outputName;
 
     QRect panelGeometry = screenGeometry;
-    panelGeometry.setHeight(height);
+    panelGeometry.setHeight(conf.panel_height);
     m_centralWidget = new QWidget;
     setCentralWidget(m_centralWidget);
 
@@ -171,7 +170,7 @@ Panel::Panel(QWidget *parent) : QMainWindow(parent)
 
     setFixedSize(panelGeometry.size());
     setGeometry(panelGeometry);
-    layerShell->setExclusiveZone(height);
+    layerShell->setExclusiveZone(conf.panel_height);
 
     /*
      * Layer shell surfaces are tied to a particular screen once shown.
@@ -180,7 +179,7 @@ Panel::Panel(QWidget *parent) : QMainWindow(parent)
     hide();
     show();
 
-    resize(screenGeometry.width(), height);
+    resize(screenGeometry.width(), conf.panel_height);
 }
 
 Panel::~Panel() { }

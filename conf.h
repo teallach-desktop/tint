@@ -25,6 +25,7 @@ struct conf {
     // Panel
     std::string panel_items;
     int panel_background_id;
+    int panel_height;
 
     // Task
     int task_background_id;

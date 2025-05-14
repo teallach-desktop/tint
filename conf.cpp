@@ -55,6 +55,9 @@ static void process_line(std::string line)
     auto value = trim(parts[1]);
     if (key == "panel_items") {
         conf.panel_items = key;
+    } else if (key == "panel_size") {
+        auto parts = split(value, ' ');
+        conf.panel_height = std::stoi(parts.at(1));
     } else if (key == "panel_background_id") {
         // TODO: check that ID is valid
         conf.panel_background_id = std::stoi(value);
@@ -89,6 +92,7 @@ static void parse(std::string filename)
 void confInit(QString filename)
 {
     conf.panel_items = "LTC";
+    conf.panel_height = 30;
 
     // background_id 0 refers to a special background which is fully transparent
     conf.backgrounds.push_back(std::make_unique<Background>());
