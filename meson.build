@@ -48,8 +48,11 @@ deps = [
   dependency('wayland-client'),
 ]
 
+incs = include_directories('include')
+
 executable(
   meson.project_name(),
   srcs,
+  include_directories: [incs],
   dependencies: deps,
 )
