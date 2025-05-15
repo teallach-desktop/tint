@@ -10,6 +10,7 @@ public:
 
     void addTask(struct zwlr_foreign_toplevel_handle_v1 *);
     void updateTasks(void);
+    int taskWidth(void);
 
 private:
     void addForeignToplevelManager(struct wl_registry *, uint32_t name, uint32_t version);

@@ -27,7 +27,13 @@ struct conf {
     int panel_background_id;
     int panel_height;
 
+    // Taskbar
+    int taskbar_padding_horizontal;
+    int taskbar_padding_vertical;
+    int taskbar_padding_spacing;
+
     // Task
+    int task_maximum_size;
     int task_background_id;
     int task_active_background_id;
 

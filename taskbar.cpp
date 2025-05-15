@@ -131,17 +131,17 @@ Task::~Task()
     }
 }
 
-#define PANEL_HEIGHT 32
-#define ITEM_HEIGHT 30.0
-#define ITEM_WIDTH 80.0
-#define ITEM_MARGIN_X 2
-#define ITEM_MARGIN_Y 2
-#define ITEM_SPACING 2
+int itemHeight(void)
+{
+    // Follows panel height
+    return conf.panel_height - conf.taskbar_padding_vertical * 2;
+}
 
 QRectF Task::boundingRect() const
 {
-    return QRectF(0.5 + ITEM_MARGIN_X, 0.5 + ITEM_MARGIN_Y, ITEM_WIDTH - 1.0 - 2.0 * ITEM_MARGIN_X,
-                  ITEM_HEIGHT - 1.0 - 2.0 * ITEM_MARGIN_Y);
+    return QRectF(0.5 + conf.taskbar_padding_horizontal, 0.5 + conf.taskbar_padding_vertical,
+                  m_taskbar->taskWidth() - 1.0 - 2.0 * conf.taskbar_padding_horizontal,
+                  itemHeight() - 1.0 - 2.0 * conf.taskbar_padding_vertical);
 }
 
 void Task::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *)
@@ -305,16 +305,37 @@ void Taskbar::addTask(struct zwlr_foreign_toplevel_handle_v1 *handle)
 
 void Taskbar::updateTasks(void)
 {
+    int width = taskWidth();
     int i = 0;
     foreach (QGraphicsItem *item, m_scene->items()) {
         if (Task *p = qgraphicsitem_cast<Task *>(item)) {
-            int margin = (PANEL_HEIGHT - ITEM_HEIGHT) / 2;
+            int margin = (conf.panel_height - itemHeight()) / 2;
             int y = margin;
-            int x = margin + i * (ITEM_WIDTH + ITEM_SPACING);
+            int x = margin + i * (width + conf.taskbar_padding_spacing);
             p->setPos(x, y);
             i++;
         }
     }
+}
+
+int Taskbar::taskWidth(void)
+{
+    int nrItems = 0;
+    foreach (QGraphicsItem *item, m_scene->items()) {
+        if (item->type() == QGraphicsItem::UserType + PANEL_TYPE_TASK) {
+            ++nrItems;
+        }
+    }
+    int width = m_scene->width();
+    width -= conf.taskbar_padding_horizontal * 2;
+    if (nrItems) {
+        width -= conf.taskbar_padding_spacing * (nrItems - 1);
+    }
+    width /= nrItems;
+    if (width > conf.task_maximum_size) {
+        width = conf.task_maximum_size;
+    }
+    return width;
 }
 
 void Taskbar::addForeignToplevelManager(struct wl_registry *registry, uint32_t name,

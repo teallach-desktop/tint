@@ -16,7 +16,10 @@ panel_items = LTSC
 panel_size = _ 30
 panel_background_id = 1
 
+# Taskbar
+taskbar_padding = 2 2 2
+
 # Task
 task_background_id = 2
 task_active_background_id = 3
-
+task_maximum_size = 150 _

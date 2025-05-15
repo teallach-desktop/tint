@@ -56,11 +56,21 @@ static void process_line(std::string line)
     if (key == "panel_items") {
         conf.panel_items = key;
     } else if (key == "panel_size") {
+        // validate
         auto parts = split(value, ' ');
         conf.panel_height = std::stoi(parts.at(1));
     } else if (key == "panel_background_id") {
         // TODO: check that ID is valid
         conf.panel_background_id = std::stoi(value);
+    } else if (key == "taskbar_padding") {
+        // validate
+        auto parts = split(value, ' ');
+        conf.taskbar_padding_horizontal = std::stoi(parts.at(0));
+        conf.taskbar_padding_vertical = std::stoi(parts.at(1));
+        conf.taskbar_padding_spacing = std::stoi(parts.at(2));
+    } else if (key == "task_maximum_size") {
+        auto parts = split(value, ' ');
+        conf.task_maximum_size = std::stoi(parts.at(0));
     } else if (key == "task_background_id") {
         conf.task_background_id = std::stoi(value);
     } else if (key == "task_active_background_id") {
@@ -93,6 +103,10 @@ void confInit(QString filename)
 {
     conf.panel_items = "LTC";
     conf.panel_height = 30;
+
+    conf.taskbar_padding_horizontal = 0;
+    conf.taskbar_padding_vertical = 0;
+    conf.taskbar_padding_spacing = 0;
 
     // background_id 0 refers to a special background which is fully transparent
     conf.backgrounds.push_back(std::make_unique<Background>());
