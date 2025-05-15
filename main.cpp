@@ -24,7 +24,12 @@ int main(int argc, char **argv)
 
     parser.process(app);
 
-    confInit(parser.value(configOption));
+    QString filename = parser.value(configOption);
+    if (filename.isEmpty()) {
+        filename = qgetenv("HOME") + "/.config/tint/tintrc";
+    }
+
+    confInit(filename);
     confSetOutput(parser.value(outputOption));
 
     Panel panel;
