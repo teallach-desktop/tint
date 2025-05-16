@@ -259,7 +259,7 @@ QString Task::getIcon(const char *app_id)
     return nullptr;
 }
 
-Taskbar::Taskbar(QWidget *parent, QGraphicsScene *scene, QGraphicsView *view)
+Taskbar::Taskbar(QWidget *parent, QGraphicsScene *scene)
     : QWidget(parent), m_scene{ scene }
 {
     // Flash up the foreign toplevel interface

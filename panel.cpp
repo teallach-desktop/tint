@@ -95,7 +95,7 @@ View::View(QRect screenGeometry, QWidget *parent) : QGraphicsView(parent)
     m_scene.addItem(p);
     p->setPos(0, 0);
 
-    Taskbar *taskbar = new Taskbar(parent, &m_scene, this);
+    Taskbar *taskbar = new Taskbar(parent, &m_scene);
     (void)taskbar;
 
     // Set the icon positions

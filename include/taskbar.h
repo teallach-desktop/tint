@@ -5,7 +5,7 @@
 class Taskbar : public QWidget
 {
 public:
-    Taskbar(QWidget *parent, QGraphicsScene *scene, QGraphicsView *view);
+    Taskbar(QWidget *parent, QGraphicsScene *scene);
     ~Taskbar();
 
     void addTask(struct zwlr_foreign_toplevel_handle_v1 *);
