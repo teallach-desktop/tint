@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: GPL-2.0-only
 #include <fstream>
 #include <memory>
-#include <print>
 #include <ranges>
 #include <regex>
 #include <string>
 #include <vector>
 #include "conf.h"
+#include "log.h"
 
 struct conf conf;
 
@@ -89,13 +89,10 @@ static void parse(std::string filename)
 {
     std::ifstream file(filename);
     std::string line;
-    if (!file.is_open()) {
-        std::println(stderr, "cannot open file '{}'", filename);
-        return;
-    }
-    while (std::getline(file, line)) {
+    if (!file.is_open())
+        die("cannot open file '{}'", filename);
+    while (std::getline(file, line))
         process_line(line);
-    }
     file.close();
 }
 
