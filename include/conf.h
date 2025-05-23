@@ -23,7 +23,8 @@ struct conf {
     std::vector<std::unique_ptr<Background>> backgrounds;
 
     // Panel
-    std::string panel_items;
+    std::string panel_items_left;
+    std::string panel_items_right;
     int panel_background_id;
     int panel_height;
 
@@ -39,6 +40,7 @@ struct conf {
 
     /* General */
     QString output;
+    double penWidth;
 };
 
 extern conf conf;

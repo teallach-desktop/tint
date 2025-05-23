@@ -6,6 +6,9 @@ project(
 )
 
 qt6 = import('qt6')
+mocs = qt6.compile_moc(headers: [
+  'include/plugin-clock.h',
+])
 
 wlr_protocols = dependency('wlr-protocols')
 wlr_protocol_dir = wlr_protocols.get_variable('pkgdatadir')
@@ -27,10 +30,12 @@ protos = [
 ]
 
 srcs = [
+  mocs,
   protos,
   'conf.cpp',
   'main.cpp',
   'panel.cpp',
+  'plugin-clock.cpp',
   'taskbar.cpp',
 ]
 

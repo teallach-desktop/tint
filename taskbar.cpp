@@ -23,7 +23,8 @@
 class Task : public QGraphicsItem
 {
 public:
-    Task(QWidget *parent, struct zwlr_foreign_toplevel_handle_v1 *handle, struct wl_seat *seat);
+    Task(QGraphicsItem *parent, struct zwlr_foreign_toplevel_handle_v1 *handle,
+         struct wl_seat *seat);
     ~Task();
 
     enum { Type = UserType + PANEL_TYPE_TASK };
@@ -50,7 +51,8 @@ private:
     bool m_hover;
 };
 
-Task::Task(QWidget *parent, struct zwlr_foreign_toplevel_handle_v1 *handle, struct wl_seat *seat)
+Task::Task(QGraphicsItem *parent, struct zwlr_foreign_toplevel_handle_v1 *handle,
+           struct wl_seat *seat)
     : m_state{ 0 }
 {
     m_handle = handle;
@@ -100,6 +102,7 @@ Task::Task(QWidget *parent, struct zwlr_foreign_toplevel_handle_v1 *handle, stru
                             break;
                         }
                     }
+                    self->update();
                 },
         .done =
                 [](void *data, zwlr_foreign_toplevel_handle_v1 *handle) {
@@ -146,12 +149,9 @@ QRectF Task::boundingRect() const
 
 void Task::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *)
 {
-    painter->setRenderHint(QPainter::Antialiasing, true);
-
-    // Panel border
     QPen pen(QColor("#8f8f91"));
     pen.setStyle(Qt::SolidLine);
-    pen.setWidth(1.0);
+    pen.setWidth(conf.penWidth);
 
     if (m_state & TASK_ACTIVE) {
         painter->setPen(pen);
@@ -178,7 +178,7 @@ void Task::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *)
     painter->drawText(rect, Qt::AlignLeft | Qt::AlignVCenter, editedText);
 
     // TODO: Not right place - so just temporary hack
-    update();
+    //   update();
 }
 
 void Task::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
@@ -259,9 +259,11 @@ QString Task::getIcon(const char *app_id)
     return nullptr;
 }
 
-Taskbar::Taskbar(QWidget *parent, QGraphicsScene *scene)
-    : QWidget(parent), m_scene{ scene }
+Taskbar::Taskbar(QGraphicsScene *scene, int height, int width) : m_scene{ scene }
 {
+    m_height = height;
+    m_width = width;
+
     // Flash up the foreign toplevel interface
     m_display = static_cast<struct wl_display *>(
             QGuiApplication::platformNativeInterface()->nativeResourceForIntegration("wl_display"));
@@ -297,6 +299,27 @@ Taskbar::~Taskbar()
     wl_registry_destroy(m_registry);
 }
 
+QRectF Taskbar::boundingRect() const
+{
+    return QRectF(0, 0, m_width, m_height);
+}
+
+QRectF Taskbar::fullDrawingRect()
+{
+    double halfPenWidth = conf.penWidth / 2.0;
+    return boundingRect().adjusted(halfPenWidth, halfPenWidth, -halfPenWidth, -halfPenWidth);
+}
+
+void Taskbar::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *)
+{
+    QPen pen(QColor("#ffbb00"));
+    pen.setStyle(Qt::SolidLine);
+    pen.setWidth(conf.penWidth);
+    painter->setPen(pen);
+    painter->setBrush(conf.backgrounds.at(conf.panel_background_id)->background_color);
+    painter->drawRect(fullDrawingRect());
+}
+
 void Taskbar::addTask(struct zwlr_foreign_toplevel_handle_v1 *handle)
 {
     m_scene->addItem(new Task(this, handle, m_seat));
@@ -311,7 +334,7 @@ void Taskbar::updateTasks(void)
         if (Task *p = qgraphicsitem_cast<Task *>(item)) {
             int margin = (conf.panel_height - itemHeight()) / 2;
             int y = margin;
-            int x = margin + i * (width + conf.taskbar_padding_spacing);
+            int x = this->x() + margin + i * (width + conf.taskbar_padding_spacing);
             p->setPos(x, y);
             i++;
         }

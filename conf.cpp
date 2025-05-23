@@ -54,7 +54,11 @@ static void process_line(std::string line)
     auto key = trim(parts[0]);
     auto value = trim(parts[1]);
     if (key == "panel_items") {
-        conf.panel_items = key;
+        if (!value.contains("T"))
+            die("no 'T' in panel_items");
+        auto parts = value | std::views::split('T') | std::ranges::to<std::vector<std::string>>();
+        conf.panel_items_left = parts.at(0);
+        conf.panel_items_right = parts.at(1);
     } else if (key == "panel_size") {
         // validate
         auto parts = split(value, ' ');
@@ -98,17 +102,21 @@ static void parse(std::string filename)
 
 void confInit(QString filename)
 {
-    conf.panel_items = "LTC";
+    conf.panel_items_left = "T";
+    conf.panel_items_right = "C";
     conf.panel_height = 30;
 
     conf.taskbar_padding_horizontal = 0;
     conf.taskbar_padding_vertical = 0;
     conf.taskbar_padding_spacing = 0;
 
+    // Temporary global settings
+    conf.penWidth = 1.0;
+
     // background_id 0 refers to a special background which is fully transparent
     conf.backgrounds.push_back(std::make_unique<Background>());
 
-    // TOOD: Init all values
+    // TOOD: Init all background values
 
     parse(filename.toStdString());
 }

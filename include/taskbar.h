@@ -1,12 +1,21 @@
 // SPDX-License-Identifier: GPL-2.0-only
 #pragma once
 #include <QGraphicsView>
+#include "item-type.h"
 
-class Taskbar : public QWidget
+class Taskbar : public QGraphicsItem
 {
 public:
-    Taskbar(QWidget *parent, QGraphicsScene *scene);
+    Taskbar(QGraphicsScene *scene, int height, int width);
     ~Taskbar();
+
+    enum { Type = UserType + PANEL_TYPE_TASKBAR };
+    int type() const override { return Type; }
+
+    QRectF boundingRect() const Q_DECL_OVERRIDE;
+    QRectF fullDrawingRect();
+    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
+               QWidget *widget) Q_DECL_OVERRIDE;
 
     void addTask(struct zwlr_foreign_toplevel_handle_v1 *);
     void updateTasks(void);
@@ -19,5 +28,7 @@ private:
     struct zwlr_foreign_toplevel_manager_v1 *m_foreignToplevelManager;
     struct wl_registry *m_registry;
     struct wl_seat *m_seat;
+    int m_width;
+    int m_height;
     QGraphicsScene *m_scene;
 };

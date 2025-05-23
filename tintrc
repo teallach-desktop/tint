@@ -1,3 +1,4 @@
+#-------------------------------------
 # Background 1: Panel
 rounded = 0
 background_color = #cecece 100
@@ -11,11 +12,13 @@ rounded = 4
 background_color = #dadbde 100
 # conf.taskActiveBorder = "8f8f91";
 
+#-------------------------------------
 # Panel
-panel_items = LTSC
+panel_items = TC
 panel_size = _ 30
 panel_background_id = 1
 
+#-------------------------------------
 # Taskbar
 taskbar_padding = 2 2 2
 
@@ -23,3 +26,8 @@ taskbar_padding = 2 2 2
 task_background_id = 2
 task_active_background_id = 3
 task_maximum_size = 150 _
+
+#-------------------------------------
+# Clock
+
+
