@@ -44,6 +44,14 @@ std::string trim(std::string s)
     return regex_replace(s, std::regex("(^[ ]+)|([ ]+$)"), "");
 }
 
+uint32_t getBackgroundId(std::string value)
+{
+    uint32_t id = std::stoi(value);
+    if (id > conf.backgrounds.size() - 1)
+        die("background_id '{}' not defined", id);
+    return id;
+}
+
 static void process_line(std::string line)
 {
     auto parts = line | std::views::split('=') | std::ranges::to<std::vector<std::string>>();
@@ -60,25 +68,28 @@ static void process_line(std::string line)
         conf.panel_items_left = parts.at(0);
         conf.panel_items_right = parts.at(1);
     } else if (key == "panel_size") {
-        // validate
         auto parts = split(value, ' ');
+        if (parts.size() != 2)
+            die("incorrect syntax '{}={}'; expected two space separated values", key, value);
         conf.panel_height = std::stoi(parts.at(1));
     } else if (key == "panel_background_id") {
-        // TODO: check that ID is valid
-        conf.panel_background_id = std::stoi(value);
+        conf.panel_background_id = getBackgroundId(value);
     } else if (key == "taskbar_padding") {
-        // validate
         auto parts = split(value, ' ');
+        if (parts.size() != 3)
+            die("incorrect syntax '{}={}'; expected three space separated values", key, value);
         conf.taskbar_padding_horizontal = std::stoi(parts.at(0));
         conf.taskbar_padding_vertical = std::stoi(parts.at(1));
         conf.taskbar_padding_spacing = std::stoi(parts.at(2));
     } else if (key == "task_maximum_size") {
         auto parts = split(value, ' ');
+        if (parts.size() != 2)
+            die("incorrect syntax '{}={}'; expected two space separated values", key, value);
         conf.task_maximum_size = std::stoi(parts.at(0));
     } else if (key == "task_background_id") {
-        conf.task_background_id = std::stoi(value);
+        conf.task_background_id =  getBackgroundId(value);
     } else if (key == "task_active_background_id") {
-        conf.task_active_background_id = std::stoi(value);
+        conf.task_active_background_id = getBackgroundId(value);
     } else if (key == "rounded") {
         // 'rounded' is special because it defines the start of a background object section
         conf.backgrounds.push_back(std::make_unique<Background>());
