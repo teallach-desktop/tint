@@ -55,7 +55,7 @@ QRectF BackgroundItem::fullDrawingRect()
 
 void BackgroundItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *)
 {
-    QPen pen(QColor("#ff0000"));
+    QPen pen(QColor(conf.backgrounds.at(conf.panel_background_id)->border_color));
     pen.setStyle(Qt::SolidLine);
     pen.setWidth(conf.penWidth);
     painter->setPen(pen);

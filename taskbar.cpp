@@ -149,7 +149,7 @@ QRectF Task::boundingRect() const
 
 void Task::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *)
 {
-    QPen pen(QColor("#8f8f91"));
+    QPen pen(QColor(conf.backgrounds.at(conf.task_active_background_id)->border_color));
     pen.setStyle(Qt::SolidLine);
     pen.setWidth(conf.penWidth);
 
@@ -312,11 +312,11 @@ QRectF Taskbar::fullDrawingRect()
 
 void Taskbar::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *)
 {
-    QPen pen(QColor("#ffbb00"));
+    QPen pen(QColor(conf.backgrounds.at(conf.taskbar_background_id)->border_color));
     pen.setStyle(Qt::SolidLine);
     pen.setWidth(conf.penWidth);
     painter->setPen(pen);
-    painter->setBrush(conf.backgrounds.at(conf.panel_background_id)->background_color);
+    painter->setBrush(conf.backgrounds.at(conf.taskbar_background_id)->background_color);
     painter->drawRect(fullDrawingRect());
 }
 

@@ -39,11 +39,11 @@ QRectF ClockItem::fullDrawingRect()
 
 void ClockItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *)
 {
-    QPen pen(QColor("#00ff00"));
+    QPen pen(QColor(conf.backgrounds.at(conf.clock_background_id)->border_color));
     pen.setStyle(Qt::SolidLine);
     pen.setWidth(conf.penWidth);
     painter->setPen(pen);
-    painter->setBrush(conf.backgrounds.at(conf.panel_background_id)->background_color);
+    painter->setBrush(conf.backgrounds.at(conf.clock_background_id)->background_color);
     painter->drawRect(fullDrawingRect());
 
     painter->setFont(m_font);

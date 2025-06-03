@@ -16,6 +16,7 @@ public:
 
     int rounded;
     QColor background_color;
+    QColor border_color;
 };
 
 struct conf {
@@ -29,6 +30,7 @@ struct conf {
     int panel_height;
 
     // Taskbar
+    int taskbar_background_id;
     int taskbar_padding_horizontal;
     int taskbar_padding_vertical;
     int taskbar_padding_spacing;
@@ -37,6 +39,9 @@ struct conf {
     int task_maximum_size;
     int task_background_id;
     int task_active_background_id;
+
+    // Clock
+    int clock_background_id;
 
     /* General */
     QString output;

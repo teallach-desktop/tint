@@ -14,6 +14,7 @@ Background::Background(void)
 {
     rounded = 0;
     background_color = QColor("#00000000");
+    border_color = QColor("#00000000");
 }
 
 Background::~Background(void) { };
@@ -31,10 +32,12 @@ static std::vector<std::string> split(std::string s, char delim)
 static QColor getColor(std::string value)
 {
     auto parts = split(value, ' ');
-    // TODO: validate
-
+    if (parts.size() != 2)
+        die("incorrect color syntax '{}'; expected '#rrggbb aaa'", value);
     std::string rrggbb = parts.at(0).erase(0, 1);
     std::string aa = std::format("{:x}", 255 * std::stoi(parts.at(1)) / 100);
+    if (aa.length() != 2)
+        aa.insert(0, "0");
     std::string color = "#" + aa + rrggbb;
     return QColor(QString::fromStdString(color));
 }
@@ -61,6 +64,8 @@ static void process_line(std::string line)
 
     auto key = trim(parts[0]);
     auto value = trim(parts[1]);
+
+    // Panel
     if (key == "panel_items") {
         if (!value.contains("T"))
             die("no 'T' in panel_items");
@@ -74,6 +79,10 @@ static void process_line(std::string line)
         conf.panel_height = std::stoi(parts.at(1));
     } else if (key == "panel_background_id") {
         conf.panel_background_id = getBackgroundId(value);
+
+        // Taskbar
+    } else if (key == "taskbar_background_id") {
+        conf.taskbar_background_id = getBackgroundId(value);
     } else if (key == "taskbar_padding") {
         auto parts = split(value, ' ');
         if (parts.size() != 3)
@@ -81,15 +90,23 @@ static void process_line(std::string line)
         conf.taskbar_padding_horizontal = std::stoi(parts.at(0));
         conf.taskbar_padding_vertical = std::stoi(parts.at(1));
         conf.taskbar_padding_spacing = std::stoi(parts.at(2));
+
+        // Task
     } else if (key == "task_maximum_size") {
         auto parts = split(value, ' ');
         if (parts.size() != 2)
             die("incorrect syntax '{}={}'; expected two space separated values", key, value);
         conf.task_maximum_size = std::stoi(parts.at(0));
     } else if (key == "task_background_id") {
-        conf.task_background_id =  getBackgroundId(value);
+        conf.task_background_id = getBackgroundId(value);
     } else if (key == "task_active_background_id") {
         conf.task_active_background_id = getBackgroundId(value);
+
+        // Clock
+    } else if (key == "clock_background_id") {
+        conf.clock_background_id = getBackgroundId(value);
+
+        // Backgrounds
     } else if (key == "rounded") {
         // 'rounded' is special because it defines the start of a background object section
         conf.backgrounds.push_back(std::make_unique<Background>());
@@ -97,6 +114,8 @@ static void process_line(std::string line)
         conf.backgrounds.at(current_background_index)->rounded = std::stoi(value);
     } else if (key == "background_color") {
         conf.backgrounds.at(current_background_index)->background_color = getColor(value);
+    } else if (key == "border_color") {
+        conf.backgrounds.at(current_background_index)->border_color = getColor(value);
     }
 }
 

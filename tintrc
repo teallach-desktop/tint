@@ -2,15 +2,17 @@
 # Background 1: Panel
 rounded = 0
 background_color = #cecece 100
+border_color = #000000 0
 
 # Background 2: Inactive Task
 rounded = 4
 background_color = #cecece 100
+border_color = #000000 0
 
 # Background 3: Active task
 rounded = 4
 background_color = #dadbde 100
-# conf.taskActiveBorder = "8f8f91";
+border_color = #8f8f91 100
 
 #-------------------------------------
 # Panel
@@ -20,6 +22,7 @@ panel_background_id = 1
 
 #-------------------------------------
 # Taskbar
+taskbar_background_id = 0
 taskbar_padding = 2 2 2
 
 # Task
@@ -29,5 +32,4 @@ task_maximum_size = 150 _
 
 #-------------------------------------
 # Clock
-
-
+clock_background_id = 0
