@@ -165,20 +165,12 @@ void Task::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *)
     painter->drawPath(path);
 
     // Text
-    QFont font;
-    // font.setFamily(font.defaultFamily());
-    font.setFamily("Sans");
-    font.setPointSize(9);
-    painter->setFont(font);
-    painter->setPen(QColor("#000000"));
+    painter->setFont(conf.task_font);
+    painter->setPen(conf.task_font_color);
     QRectF rect = boundingRect().adjusted(3, 0, -6, 0);
-    QFontMetrics metrics(font);
-    QString editedText =
-            metrics.elidedText(QString::fromStdString(m_app_id), Qt::ElideRight, rect.width());
-    painter->drawText(rect, Qt::AlignLeft | Qt::AlignVCenter, editedText);
-
-    // TODO: Not right place - so just temporary hack
-    //   update();
+    QFontMetrics metrics(conf.task_font);
+    QString s = metrics.elidedText(QString::fromStdString(m_app_id), Qt::ElideRight, rect.width());
+    painter->drawText(rect, Qt::AlignLeft | Qt::AlignVCenter, s);
 }
 
 void Task::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)

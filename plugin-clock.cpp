@@ -15,8 +15,7 @@ ClockItem::ClockItem(QObject *parent, int height) : QObject(parent)
     m_height = height;
 
     m_text = "MM:MM";
-    m_font = QFont("Sans", 10);
-    QFontMetrics fm(m_font);
+    QFontMetrics fm(conf.time1_font);
     m_width = fm.horizontalAdvance(m_text) + 3 + 3 + 1;
     m_text = QDateTime::currentDateTime().toString("hh:mm");
 
@@ -46,11 +45,11 @@ void ClockItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidg
     painter->setBrush(conf.backgrounds.at(conf.clock_background_id)->background_color);
     painter->drawRect(fullDrawingRect());
 
-    painter->setFont(m_font);
-    painter->setPen(QColor("#000000"));
+    painter->setFont(conf.time1_font);
+    painter->setPen(conf.clock_font_color);
     // TODO: add config padding stuff here
     QRectF rect = fullDrawingRect().adjusted(3, 0, -6, 0);
-    QFontMetrics metrics(m_font);
+    QFontMetrics metrics(conf.time1_font);
     QString text = metrics.elidedText(m_text, Qt::ElideRight, rect.width());
     painter->drawText(rect, Qt::AlignCenter | Qt::AlignVCenter, text);
 }

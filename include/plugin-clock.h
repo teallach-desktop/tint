@@ -27,6 +27,5 @@ private:
     int m_width;
     int m_height;
     QString m_text;
-    QFont m_font;
     QTimer m_timer;
 };

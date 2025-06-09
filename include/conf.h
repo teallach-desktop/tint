@@ -2,6 +2,7 @@
 #pragma once
 #include <QString>
 #include <QColor>
+#include <QFont>
 
 enum tint_task_state {
     TASK_ACTIVE = (1 << 0),
@@ -37,11 +38,15 @@ struct conf {
 
     // Task
     int task_maximum_size;
+    QFont task_font;
+    QColor task_font_color;
     int task_background_id;
     int task_active_background_id;
 
     // Clock
     int clock_background_id;
+    QFont time1_font;
+    QColor clock_font_color;
 
     /* General */
     QString output;

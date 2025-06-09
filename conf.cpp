@@ -42,6 +42,17 @@ static QColor getColor(std::string value)
     return QColor(QString::fromStdString(color));
 }
 
+static QFont getFont(std::string value)
+{
+    auto parts = split(value, ' ');
+    if (parts.size() != 3)
+        die("incorrect font syntax '{}'; expected '[family] [style] [size]'", value);
+    QFont font;
+    font.setFamily(QString::fromStdString(parts.at(0)));
+    font.setPointSize(std::stoi(parts.at(2)));
+    return font;
+}
+
 std::string trim(std::string s)
 {
     return regex_replace(s, std::regex("(^[ ]+)|([ ]+$)"), "");
@@ -97,6 +108,10 @@ static void process_line(std::string line)
         if (parts.size() != 2)
             die("incorrect syntax '{}={}'; expected two space separated values", key, value);
         conf.task_maximum_size = std::stoi(parts.at(0));
+    } else if (key == "task_font") {
+        conf.task_font = getFont(value);
+    } else if (key == "task_font_color") {
+        conf.task_font_color = getColor(value);
     } else if (key == "task_background_id") {
         conf.task_background_id = getBackgroundId(value);
     } else if (key == "task_active_background_id") {
@@ -105,6 +120,10 @@ static void process_line(std::string line)
         // Clock
     } else if (key == "clock_background_id") {
         conf.clock_background_id = getBackgroundId(value);
+    } else if (key == "time1_font") {
+        conf.time1_font = getFont(value);
+    } else if (key == "clock_font_color") {
+        conf.clock_font_color = getColor(value);
 
         // Backgrounds
     } else if (key == "rounded") {
@@ -132,13 +151,22 @@ static void parse(std::string filename)
 
 void confInit(QString filename)
 {
+    // Panel
     conf.panel_items_left = "T";
     conf.panel_items_right = "C";
     conf.panel_height = 30;
 
+    // Taskbar
     conf.taskbar_padding_horizontal = 0;
     conf.taskbar_padding_vertical = 0;
     conf.taskbar_padding_spacing = 0;
+
+    conf.task_font = QFont("Sans", 10);
+    conf.task_font_color = QColor("#ffffff");
+
+    // Clock
+    conf.time1_font = QFont("Sans", 10);
+    conf.clock_font_color = QColor("#ffffff");
 
     // Temporary global settings
     conf.penWidth = 1.0;

@@ -29,7 +29,12 @@ taskbar_padding = 2 2 2
 task_background_id = 2
 task_active_background_id = 3
 task_maximum_size = 150 _
+task_font = Sans _ 10
+task_font_color = #000000 100
 
 #-------------------------------------
 # Clock
 clock_background_id = 0
+time1_font = Sans _ 10
+clock_font_color = #000000 100
+
