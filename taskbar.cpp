@@ -137,14 +137,14 @@ Task::~Task()
 int itemHeight(void)
 {
     // Follows panel height
-    return conf.panel_height - conf.taskbar_padding_vertical * 2;
+    return conf.panel_height - conf.taskbar_padding.vertical * 2;
 }
 
 QRectF Task::boundingRect() const
 {
-    return QRectF(0.5 + conf.taskbar_padding_horizontal, 0.5 + conf.taskbar_padding_vertical,
-                  m_taskbar->taskWidth() - 1.0 - 2.0 * conf.taskbar_padding_horizontal,
-                  itemHeight() - 1.0 - 2.0 * conf.taskbar_padding_vertical);
+    return QRectF(0.5 + conf.taskbar_padding.horizontal, 0.5 + conf.taskbar_padding.vertical,
+                  m_taskbar->taskWidth() - 1.0 - 2.0 * conf.taskbar_padding.horizontal,
+                  itemHeight() - 1.0 - 2.0 * conf.taskbar_padding.vertical);
 }
 
 void Task::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *)
@@ -326,7 +326,7 @@ void Taskbar::updateTasks(void)
         if (Task *p = qgraphicsitem_cast<Task *>(item)) {
             int margin = (conf.panel_height - itemHeight()) / 2;
             int y = margin;
-            int x = this->x() + margin + i * (width + conf.taskbar_padding_spacing);
+            int x = this->x() + margin + i * (width + conf.taskbar_padding.spacing);
             p->setPos(x, y);
             i++;
         }
@@ -342,9 +342,9 @@ int Taskbar::taskWidth(void)
         }
     }
     int width = m_scene->width();
-    width -= conf.taskbar_padding_horizontal * 2;
+    width -= conf.taskbar_padding.horizontal * 2;
     if (nrItems) {
-        width -= conf.taskbar_padding_spacing * (nrItems - 1);
+        width -= conf.taskbar_padding.spacing * (nrItems - 1);
     }
     width /= nrItems;
     if (width > conf.task_maximum_size) {

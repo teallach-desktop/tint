@@ -9,6 +9,12 @@ enum tint_task_state {
     TASK_MINIMIZED = (1 << 1),
 };
 
+struct padding {
+    int horizontal;
+    int vertical;
+    int spacing;
+};
+
 class Background
 {
 public:
@@ -32,9 +38,7 @@ struct conf {
 
     // Taskbar
     int taskbar_background_id;
-    int taskbar_padding_horizontal;
-    int taskbar_padding_vertical;
-    int taskbar_padding_spacing;
+    struct padding taskbar_padding;
 
     // Task
     int task_maximum_size;

@@ -53,6 +53,19 @@ static QFont getFont(std::string value)
     return font;
 }
 
+static struct padding getPadding(std::string value)
+{
+    auto parts = split(value, ' ');
+    if (parts.size() != 3)
+        die("incorrect padding syntax '{}'; expected '[horizontal] [vertical] [spacing]'", value);
+    struct padding padding {
+        .horizontal = std::stoi(parts.at(0)),
+        .vertical = std::stoi(parts.at(1)),
+        .spacing = std::stoi(parts.at(2)),
+    };
+    return padding;
+}
+
 std::string trim(std::string s)
 {
     return regex_replace(s, std::regex("(^[ ]+)|([ ]+$)"), "");
@@ -95,12 +108,7 @@ static void process_line(std::string line)
     } else if (key == "taskbar_background_id") {
         conf.taskbar_background_id = getBackgroundId(value);
     } else if (key == "taskbar_padding") {
-        auto parts = split(value, ' ');
-        if (parts.size() != 3)
-            die("incorrect syntax '{}={}'; expected three space separated values", key, value);
-        conf.taskbar_padding_horizontal = std::stoi(parts.at(0));
-        conf.taskbar_padding_vertical = std::stoi(parts.at(1));
-        conf.taskbar_padding_spacing = std::stoi(parts.at(2));
+        conf.taskbar_padding = getPadding(value);
 
         // Task
     } else if (key == "task_maximum_size") {
@@ -157,9 +165,7 @@ void confInit(QString filename)
     conf.panel_height = 30;
 
     // Taskbar
-    conf.taskbar_padding_horizontal = 0;
-    conf.taskbar_padding_vertical = 0;
-    conf.taskbar_padding_spacing = 0;
+    conf.taskbar_padding = { 0 };
 
     conf.task_font = QFont("Sans", 10);
     conf.task_font_color = QColor("#ffffff");
