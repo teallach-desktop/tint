@@ -15,6 +15,7 @@
 #include "log.h"
 #include "panel.h"
 #include "plugin-clock.h"
+#include "sfdo.h"
 #include "taskbar.h"
 
 class BackgroundItem : public QGraphicsItem
@@ -66,7 +67,7 @@ void BackgroundItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *, 
 class View : public QGraphicsView
 {
 public:
-    View(QRect screenGeometry, QWidget *parent = 0);
+    View(QRect screenGeometry, struct sfdo *sfdo, QWidget *parent = 0);
     ~View();
     void addPlugin(int type, bool left_aligned, int &offset);
 
@@ -75,7 +76,7 @@ private:
     QGraphicsScene m_scene;
 };
 
-View::View(QRect screenGeometry, QWidget *parent) : QGraphicsView(parent)
+View::View(QRect screenGeometry, struct sfdo *sfdo, QWidget *parent) : QGraphicsView(parent)
 {
     m_parent = parent;
     setScene(&m_scene);
@@ -96,6 +97,7 @@ View::View(QRect screenGeometry, QWidget *parent) : QGraphicsView(parent)
     m_scene.addItem(p);
     p->setPos(0, 0);
 
+    info("load plugins");
     // Add plugins from right
     int offset_from_right = width;
     for (auto it = conf.panel_items_right.rbegin(); it != conf.panel_items_right.rend(); ++it) {
@@ -112,7 +114,8 @@ View::View(QRect screenGeometry, QWidget *parent) : QGraphicsView(parent)
     int taskbarWidth = offset_from_right - offset_from_left;
     if (taskbarWidth < 200)
         die("not enough space for taskbar; remove some plugins");
-    Taskbar *taskbar = new Taskbar(&m_scene, conf.panel_height, taskbarWidth);
+    info(" - load plugin-taskbar");
+    Taskbar *taskbar = new Taskbar(&m_scene, conf.panel_height, taskbarWidth, sfdo);
     m_scene.addItem(taskbar);
     taskbar->setPos(offset_from_left, 0);
 
@@ -134,6 +137,7 @@ void View::addPlugin(int type, bool left_aligned, int &offset)
 {
     switch (type) {
     case 'C': {
+        info(" - load plugin-clock");
         ClockItem *clockItem = new ClockItem(this, conf.panel_height);
         m_scene.addItem(clockItem);
         if (!left_aligned)
@@ -148,8 +152,56 @@ void View::addPlugin(int type, bool left_aligned, int &offset)
     }
 }
 
+static void log_handler(enum sfdo_log_level level, const char *fmt, va_list args, void *tag)
+{
+    char buf[256];
+    if (snprintf(buf, sizeof(buf), "[%s] %s", (const char *)tag, fmt) < (int)sizeof(buf)) {
+        fmt = buf;
+    }
+    vfprintf(stderr, fmt, args);
+    fprintf(stderr, "\n");
+}
+
+void Panel::desktopEntryInit(void)
+{
+    struct sfdo_basedir_ctx *basedir_ctx = sfdo_basedir_ctx_create();
+    if (!basedir_ctx)
+        die("sfdo_basedir_ctx_create()");
+    m_sfdo.desktop_ctx = sfdo_desktop_ctx_create(basedir_ctx);
+    if (!m_sfdo.desktop_ctx)
+        die("sfdo_desktop_ctx_create()");
+    m_sfdo.icon_ctx = sfdo_icon_ctx_create(basedir_ctx);
+    if (!m_sfdo.icon_ctx)
+        die("sfdo_icon_ctx_create()");
+    enum sfdo_log_level level = SFDO_LOG_LEVEL_ERROR;
+    sfdo_desktop_ctx_set_log_handler(m_sfdo.desktop_ctx, level, log_handler, (void *)"libsfdo");
+    sfdo_icon_ctx_set_log_handler(m_sfdo.icon_ctx, level, log_handler, (void *)"libsfdo");
+    char *locale = setlocale(LC_ALL, "");
+    m_sfdo.desktop_db = sfdo_desktop_db_load(m_sfdo.desktop_ctx, locale);
+    if (!m_sfdo.desktop_db)
+        die("sfdo_desktop_db_load()");
+    int load_options = SFDO_ICON_THEME_LOAD_OPTIONS_DEFAULT
+            | SFDO_ICON_THEME_LOAD_OPTION_ALLOW_MISSING | SFDO_ICON_THEME_LOAD_OPTION_RELAXED;
+    m_sfdo.icon_theme = sfdo_icon_theme_load(m_sfdo.icon_ctx, "Papirus", load_options);
+    if (!m_sfdo.icon_theme)
+        die("sfdo_icon_theme_load()");
+    sfdo_basedir_ctx_destroy(basedir_ctx);
+}
+
+void Panel::desktopEntryFinish(void)
+{
+    sfdo_icon_theme_destroy(m_sfdo.icon_theme);
+    sfdo_desktop_db_destroy(m_sfdo.desktop_db);
+    sfdo_icon_ctx_destroy(m_sfdo.icon_ctx);
+    sfdo_desktop_ctx_destroy(m_sfdo.desktop_ctx);
+}
+
 Panel::Panel(QWidget *parent) : QMainWindow(parent)
 {
+    info("load sfdo resources");
+    desktopEntryInit();
+
+    info("init layer-shell surface");
     LayerShellQt::Shell::useLayerShell();
     this->winId();
     QWindow *window = this->windowHandle();
@@ -201,7 +253,7 @@ Panel::Panel(QWidget *parent) : QMainWindow(parent)
     QStackedLayout *layout = new QStackedLayout;
     m_centralWidget->setLayout(layout);
 
-    View *view = new View(screenGeometry, m_centralWidget);
+    View *view = new View(screenGeometry, &m_sfdo, m_centralWidget);
     layout->addWidget(view);
 
     setFixedSize(panelGeometry.size());
@@ -218,4 +270,7 @@ Panel::Panel(QWidget *parent) : QMainWindow(parent)
     resize(screenGeometry.width(), conf.panel_height);
 }
 
-Panel::~Panel() { }
+Panel::~Panel()
+{
+    desktopEntryFinish();
+}

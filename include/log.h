@@ -4,6 +4,7 @@
 
 enum LogLevel {
     FATAL,
+    INFO,
 };
 
 constexpr const char *log_level_string(LogLevel level)
@@ -11,6 +12,8 @@ constexpr const char *log_level_string(LogLevel level)
     switch (level) {
     case LogLevel::FATAL:
         return "fatal";
+    case LogLevel::INFO:
+        return "info";
     default:
         return "unknown";
     }
@@ -23,6 +26,8 @@ static inline void _log(LogLevel level, std::format_string<Args...> fmt, Args &&
     switch (level) {
     case LogLevel::FATAL:
         msg = std::string("\033[1;31m") + log_level_string(level) + ": " + msg + "\033[0m";
+    case LogLevel::INFO:
+        msg = std::string("\033[1;32m") + log_level_string(level) + ": " + msg + "\033[0m";
     default:
         break;
     }
@@ -33,4 +38,9 @@ static inline void _log(LogLevel level, std::format_string<Args...> fmt, Args &&
     {                                                                                             \
         _log(LogLevel::FATAL, "[{}:{}] {}", __FILE__, __LINE__, std::format(fmt, ##__VA_ARGS__)); \
         exit(EXIT_FAILURE);                                                                       \
+    }
+
+#define info(fmt, ...)                                                                           \
+    {                                                                                            \
+        _log(LogLevel::INFO, "[{}:{}] {}", __FILE__, __LINE__, std::format(fmt, ##__VA_ARGS__)); \
     }

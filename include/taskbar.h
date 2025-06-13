@@ -6,7 +6,7 @@
 class Taskbar : public QGraphicsItem
 {
 public:
-    Taskbar(QGraphicsScene *scene, int height, int width);
+    Taskbar(QGraphicsScene *scene, int height, int width, struct sfdo *sfdo);
     ~Taskbar();
 
     enum { Type = UserType + PANEL_TYPE_TASKBAR };
@@ -31,4 +31,9 @@ private:
     int m_width;
     int m_height;
     QGraphicsScene *m_scene;
+    struct sfdo *m_sfdo;
+
+public:
+    // Getters
+    struct sfdo *sfdo() const { return m_sfdo; }
 };

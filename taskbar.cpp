@@ -42,14 +42,40 @@ protected:
     void hoverLeaveEvent(QGraphicsSceneHoverEvent *) override;
 
 private:
-    QString getIcon(const char *app_id);
     struct wl_seat *m_seat;
     struct zwlr_foreign_toplevel_handle_v1 *m_handle;
     uint32_t m_state;
     Taskbar *m_taskbar;
     std::string m_app_id;
+    QPixmap m_icon;
     bool m_hover;
 };
+
+static QPixmap getIcon(struct sfdo *sfdo, const char *app_id)
+{
+    int size = 22;
+    float scale = 1.0;
+
+    struct sfdo_desktop_entry *entry =
+            sfdo_desktop_db_get_entry_by_id(sfdo->desktop_db, app_id, SFDO_NT);
+    const char *icon_name = entry ? sfdo_desktop_entry_get_icon(entry, NULL) : NULL;
+    if (!icon_name) {
+        return QPixmap();
+    }
+
+    int lookup_options = SFDO_ICON_THEME_LOOKUP_OPTIONS_DEFAULT;
+    size_t name_len = strlen(icon_name);
+    struct sfdo_icon_file *icon_file = sfdo_icon_theme_lookup(sfdo->icon_theme, icon_name, name_len,
+                                                              size, scale, lookup_options);
+    if (!icon_file || icon_file == SFDO_ICON_FILE_INVALID) {
+        sfdo_icon_file_destroy(icon_file);
+        return QPixmap();
+    }
+
+    QString name = QString(sfdo_icon_file_get_path(icon_file, NULL));
+    sfdo_icon_file_destroy(icon_file);
+    return QIcon(name).pixmap(QSize(size, size));
+}
 
 Task::Task(QGraphicsItem *parent, struct zwlr_foreign_toplevel_handle_v1 *handle,
            struct wl_seat *seat)
@@ -71,11 +97,8 @@ Task::Task(QGraphicsItem *parent, struct zwlr_foreign_toplevel_handle_v1 *handle
                 [](void *data, zwlr_foreign_toplevel_handle_v1 *handle, const char *app_id) {
                     auto self = static_cast<Task *>(data);
                     self->m_app_id = app_id;
-                    // QIcon icon = QIcon::fromTheme(self->getIcon(app_id));
-                    // if (icon.isNull()) {
-                    //     qDebug() << "no icon for " << app_id;
-                    //  }
-                    // self->update();
+                    self->m_icon = getIcon(self->m_taskbar->sfdo(), app_id);
+                    self->update();
                 },
         .output_enter =
                 [](void *data, zwlr_foreign_toplevel_handle_v1 *handle, wl_output *output) {
@@ -164,10 +187,19 @@ void Task::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *)
     path.addRoundedRect(boundingRect(), 4, 4);
     painter->drawPath(path);
 
+    // Icon
+    if (!m_icon.isNull()) {
+        int size = 22;
+        int offset = 5;
+        QRect target(offset, offset, size, size);
+        QRect source(0, 0, size, size);
+        painter->drawPixmap(target, m_icon, source);
+    }
+
     // Text
     painter->setFont(conf.task_font);
     painter->setPen(conf.task_font_color);
-    QRectF rect = boundingRect().adjusted(3, 0, -6, 0);
+    QRectF rect = boundingRect().adjusted(3 + 22 + 2 + 2, 0, -6, 0);
     QFontMetrics metrics(conf.task_font);
     QString s = metrics.elidedText(QString::fromStdString(m_app_id), Qt::ElideRight, rect.width());
     painter->drawText(rect, Qt::AlignLeft | Qt::AlignVCenter, s);
@@ -214,47 +246,11 @@ void Task::hoverLeaveEvent(QGraphicsSceneHoverEvent *)
     update();
 }
 
-// Not the prettiest, but just to get a simple prototype going
-QString Task::getIcon(const char *app_id)
-{
-    QDirIterator it(QString("/usr/share/applications"));
-    while (it.hasNext()) {
-        QString filename = it.next();
-        if (!filename.contains(QString::fromStdString(app_id) + ".desktop")) {
-            continue;
-        }
-        QFile f(filename);
-        if (!f.open(QIODevice::ReadOnly)) {
-            qDebug() << "cannot read file" << f.fileName();
-            continue;
-        }
-        bool inEntry = false;
-        QTextStream in(&f);
-        while (!in.atEnd()) {
-            QString line = in.readLine();
-            if (line.contains("[Desktop Entry]")) {
-                inEntry = true;
-                continue;
-            } else if (line.startsWith("[")) {
-                inEntry = false;
-                continue;
-            }
-            if (!inEntry) {
-                continue;
-            }
-            if (line.startsWith("Icon=")) {
-                return line.replace("Icon=", "");
-            }
-        }
-        break;
-    }
-    return nullptr;
-}
-
-Taskbar::Taskbar(QGraphicsScene *scene, int height, int width) : m_scene{ scene }
+Taskbar::Taskbar(QGraphicsScene *scene, int height, int width, struct sfdo *sfdo) : m_scene{ scene }
 {
     m_height = height;
     m_width = width;
+    m_sfdo = sfdo;
 
     // Flash up the foreign toplevel interface
     m_display = static_cast<struct wl_display *>(

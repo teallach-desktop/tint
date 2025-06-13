@@ -58,7 +58,7 @@ static struct padding getPadding(std::string value)
     auto parts = split(value, ' ');
     if (parts.size() != 3)
         die("incorrect padding syntax '{}'; expected '[horizontal] [vertical] [spacing]'", value);
-    struct padding padding {
+    struct padding padding{
         .horizontal = std::stoi(parts.at(0)),
         .vertical = std::stoi(parts.at(1)),
         .spacing = std::stoi(parts.at(2)),

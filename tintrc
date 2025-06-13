@@ -17,7 +17,7 @@ border_color = #8f8f91 100
 #-------------------------------------
 # Panel
 panel_items = TC
-panel_size = _ 30
+panel_size = _ 36
 panel_background_id = 1
 
 #-------------------------------------

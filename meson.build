@@ -51,6 +51,9 @@ deps = [
     private_headers: true),
   dependency('LayerShellQt', modules: ['LayerShellQt::Interface']),
   dependency('wayland-client'),
+  dependency('libsfdo-basedir'),
+  dependency('libsfdo-desktop'),
+  dependency('libsfdo-icon'),
 ]
 
 incs = include_directories('include')

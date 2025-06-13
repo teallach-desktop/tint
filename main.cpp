@@ -1,15 +1,18 @@
 // SPDX-License-Identifier: GPL-2.0-only
 #include <QApplication>
 #include <QCommandLineParser>
+#include "log.h"
 #include "conf.h"
 #include "panel.h"
 
 int main(int argc, char **argv)
 {
+    info("init application");
     QApplication app(argc, argv);
     QApplication::setApplicationName("tint");
     QApplication::setApplicationVersion("0.0.0");
 
+    info("parse command line options");
     QCommandLineParser parser;
     parser.setApplicationDescription("A panel of beauty");
     parser.addHelpOption();
@@ -29,6 +32,7 @@ int main(int argc, char **argv)
         filename = qgetenv("HOME") + "/.config/tint/tintrc";
     }
 
+    info("read config file '{}'", filename.toStdString());
     confInit(filename);
     confSetOutput(parser.value(outputOption));
 

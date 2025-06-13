@@ -2,14 +2,11 @@
 
 ## Why
 
-Pursuing beauty.
+Pursuing beauty
 
 ## What
 
-A panel inspired by tint2.
-
-Aims to re-produce these one day:
-- https://github.com/addy-dclxvi/tint2-theme-collections
+A panel inspired by tint2
 
 ## Dependencies
 
@@ -17,11 +14,13 @@ Aims to re-produce these one day:
 - qt6-base, qt6-wayland
 - [layer-shell-qt]
 - [wlr-protocols]
+- [libsfdo]
 
-On Arch Linux, sun `sudo pacman -S layer-shell-qt wlr-protocols`
+On Arch Linux, run `sudo pacman -S layer-shell-qt wlr-protocols libsfdo`
 
 [layer-shell-qt]: https://invent.kde.org/plasma/layer-shell-qt
 [wlr-protocols]: https://repology.org/project/wlr-protocols/versions
+[libsfdo]: https://gitlab.freedesktop.org/vyivel/libsfdo
 
 ## Build
 
@@ -36,4 +35,7 @@ meson compile -C build
 build/tint -c tintrc
 ```
 
+## References
+
+- https://github.com/addy-dclxvi/tint2-theme-collections
 
