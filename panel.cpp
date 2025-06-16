@@ -114,7 +114,6 @@ View::View(QRect screenGeometry, struct sfdo *sfdo, QWidget *parent) : QGraphics
     int taskbarWidth = offset_from_right - offset_from_left;
     if (taskbarWidth < 200)
         die("not enough space for taskbar; remove some plugins");
-    info(" - load plugin-taskbar");
     Taskbar *taskbar = new Taskbar(&m_scene, conf.panel_height, taskbarWidth, sfdo);
     m_scene.addItem(taskbar);
     taskbar->setPos(offset_from_left, 0);
@@ -137,7 +136,6 @@ void View::addPlugin(int type, bool left_aligned, int &offset)
 {
     switch (type) {
     case 'C': {
-        info(" - load plugin-clock");
         ClockItem *clockItem = new ClockItem(this, conf.panel_height);
         m_scene.addItem(clockItem);
         if (!left_aligned)
@@ -237,13 +235,12 @@ Panel::Panel(QWidget *parent) : QMainWindow(parent)
     QString outputName;
     for (QScreen *s : screen->virtualSiblings()) {
         outputName = s->name();
-        qDebug() << "name=" << outputName << "; geometry=" << s->geometry();
         screenGeometry = s->geometry();
         if (outputName == conf.output) {
             break;
         }
     }
-    qDebug() << "Using output " << outputName;
+    info("use output '{}'", outputName.toStdString());
 
     QRect panelGeometry = screenGeometry;
     panelGeometry.setHeight(conf.panel_height);

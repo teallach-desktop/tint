@@ -7,12 +7,10 @@
 
 int main(int argc, char **argv)
 {
-    info("init application");
     QApplication app(argc, argv);
     QApplication::setApplicationName("tint");
     QApplication::setApplicationVersion("0.0.0");
 
-    info("parse command line options");
     QCommandLineParser parser;
     parser.setApplicationDescription("A panel of beauty");
     parser.addHelpOption();

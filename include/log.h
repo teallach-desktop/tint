@@ -26,8 +26,10 @@ static inline void _log(LogLevel level, std::format_string<Args...> fmt, Args &&
     switch (level) {
     case LogLevel::FATAL:
         msg = std::string("\033[1;31m") + log_level_string(level) + ": " + msg + "\033[0m";
+        break;
     case LogLevel::INFO:
         msg = std::string("\033[1;32m") + log_level_string(level) + ": " + msg + "\033[0m";
+        break;
     default:
         break;
     }

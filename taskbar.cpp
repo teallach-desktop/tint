@@ -14,10 +14,11 @@
 #include <pthread.h>
 #include <wayland-client.h>
 #include <qpa/qplatformnativeinterface.h>
-#include "panel.h"
 #include "conf.h"
-#include "taskbar.h"
+#include "log.h"
 #include "item-type.h"
+#include "panel.h"
+#include "taskbar.h"
 #include "wlr-foreign-toplevel-management-unstable-v1.h"
 
 class Task : public QGraphicsItem
@@ -354,10 +355,8 @@ void Taskbar::addForeignToplevelManager(struct wl_registry *registry, uint32_t n
 {
     m_foreignToplevelManager = static_cast<struct zwlr_foreign_toplevel_manager_v1 *>(
             wl_registry_bind(registry, name, &zwlr_foreign_toplevel_manager_v1_interface, version));
-    if (!m_foreignToplevelManager) {
-        qDebug() << "foreign-toplevel-management protocol not supported by compositor";
-        return;
-    }
+    if (!m_foreignToplevelManager)
+        die("foreign-toplevel-management protocol not supported by compositor");
 
     static const zwlr_foreign_toplevel_manager_v1_listener toplevel_manager_impl = {
         .toplevel =
@@ -380,7 +379,6 @@ void Taskbar::addSeat(struct wl_registry *registry, uint32_t name, uint32_t vers
     version = std::min<uint32_t>(version, wl_seat_interface.version);
     m_seat = static_cast<struct wl_seat *>(
             wl_registry_bind(registry, name, &wl_seat_interface, version));
-    if (!m_seat) {
-        qDebug() << "no wl_seat";
-    }
+    if (!m_seat)
+        die("no wl_seat");
 }
