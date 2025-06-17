@@ -10,3 +10,6 @@ struct sfdo {
     struct sfdo_desktop_db *desktop_db;
     struct sfdo_icon_theme *icon_theme;
 };
+
+void desktopEntryInit(struct sfdo *sfdo);
+void desktopEntryFinish(struct sfdo *sfdo);

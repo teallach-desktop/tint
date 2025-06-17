@@ -1,17 +1,13 @@
 // SPDX-License-Identifier: GPL-2.0-only
 #pragma once
 #include <QMainWindow>
-#include "sfdo.h"
+#include "resources.h"
 
 class Panel : public QMainWindow
 {
 public:
     Panel(QWidget *parent = nullptr);
     ~Panel();
-
-    // libsfdo related
-    void desktopEntryInit();
-    void desktopEntryFinish();
 
 private:
     QWidget *m_centralWidget;

@@ -15,7 +15,6 @@
 #include "log.h"
 #include "panel.h"
 #include "plugin-clock.h"
-#include "sfdo.h"
 #include "taskbar.h"
 
 class BackgroundItem : public QGraphicsItem
@@ -150,54 +149,10 @@ void View::addPlugin(int type, bool left_aligned, int &offset)
     }
 }
 
-static void log_handler(enum sfdo_log_level level, const char *fmt, va_list args, void *tag)
-{
-    char buf[256];
-    if (snprintf(buf, sizeof(buf), "[%s] %s", (const char *)tag, fmt) < (int)sizeof(buf)) {
-        fmt = buf;
-    }
-    vfprintf(stderr, fmt, args);
-    fprintf(stderr, "\n");
-}
-
-void Panel::desktopEntryInit(void)
-{
-    struct sfdo_basedir_ctx *basedir_ctx = sfdo_basedir_ctx_create();
-    if (!basedir_ctx)
-        die("sfdo_basedir_ctx_create()");
-    m_sfdo.desktop_ctx = sfdo_desktop_ctx_create(basedir_ctx);
-    if (!m_sfdo.desktop_ctx)
-        die("sfdo_desktop_ctx_create()");
-    m_sfdo.icon_ctx = sfdo_icon_ctx_create(basedir_ctx);
-    if (!m_sfdo.icon_ctx)
-        die("sfdo_icon_ctx_create()");
-    enum sfdo_log_level level = SFDO_LOG_LEVEL_ERROR;
-    sfdo_desktop_ctx_set_log_handler(m_sfdo.desktop_ctx, level, log_handler, (void *)"libsfdo");
-    sfdo_icon_ctx_set_log_handler(m_sfdo.icon_ctx, level, log_handler, (void *)"libsfdo");
-    char *locale = setlocale(LC_ALL, "");
-    m_sfdo.desktop_db = sfdo_desktop_db_load(m_sfdo.desktop_ctx, locale);
-    if (!m_sfdo.desktop_db)
-        die("sfdo_desktop_db_load()");
-    int load_options = SFDO_ICON_THEME_LOAD_OPTIONS_DEFAULT
-            | SFDO_ICON_THEME_LOAD_OPTION_ALLOW_MISSING | SFDO_ICON_THEME_LOAD_OPTION_RELAXED;
-    m_sfdo.icon_theme = sfdo_icon_theme_load(m_sfdo.icon_ctx, "Papirus", load_options);
-    if (!m_sfdo.icon_theme)
-        die("sfdo_icon_theme_load()");
-    sfdo_basedir_ctx_destroy(basedir_ctx);
-}
-
-void Panel::desktopEntryFinish(void)
-{
-    sfdo_icon_theme_destroy(m_sfdo.icon_theme);
-    sfdo_desktop_db_destroy(m_sfdo.desktop_db);
-    sfdo_icon_ctx_destroy(m_sfdo.icon_ctx);
-    sfdo_desktop_ctx_destroy(m_sfdo.desktop_ctx);
-}
-
 Panel::Panel(QWidget *parent) : QMainWindow(parent)
 {
     info("load sfdo resources");
-    desktopEntryInit();
+    desktopEntryInit(&m_sfdo);
 
     info("init layer-shell surface");
     LayerShellQt::Shell::useLayerShell();
@@ -269,5 +224,5 @@ Panel::Panel(QWidget *parent) : QMainWindow(parent)
 
 Panel::~Panel()
 {
-    desktopEntryFinish();
+    desktopEntryFinish(&m_sfdo);
 }

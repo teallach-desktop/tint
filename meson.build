@@ -36,6 +36,7 @@ srcs = [
   'main.cpp',
   'panel.cpp',
   'plugin-clock.cpp',
+  'resources.cpp',
   'taskbar.cpp',
 ]
 
