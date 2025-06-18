@@ -56,26 +56,10 @@ static QPixmap getIcon(struct sfdo *sfdo, const char *app_id)
 {
     int size = 22;
     float scale = 1.0;
-
-    struct sfdo_desktop_entry *entry =
-            sfdo_desktop_db_get_entry_by_id(sfdo->desktop_db, app_id, SFDO_NT);
-    const char *icon_name = entry ? sfdo_desktop_entry_get_icon(entry, NULL) : NULL;
-    if (!icon_name) {
-        return QPixmap();
-    }
-
-    int lookup_options = SFDO_ICON_THEME_LOOKUP_OPTIONS_DEFAULT;
-    size_t name_len = strlen(icon_name);
-    struct sfdo_icon_file *icon_file = sfdo_icon_theme_lookup(sfdo->icon_theme, icon_name, name_len,
-                                                              size, scale, lookup_options);
-    if (!icon_file || icon_file == SFDO_ICON_FILE_INVALID) {
-        sfdo_icon_file_destroy(icon_file);
-        return QPixmap();
-    }
-
-    QString name = QString(sfdo_icon_file_get_path(icon_file, NULL));
-    sfdo_icon_file_destroy(icon_file);
-    return QIcon(name).pixmap(QSize(size, size));
+    std::string name = load_icon_from_app_id(sfdo, app_id, size, scale);
+    QPixmap pixmap = name.empty() ? QPixmap()
+                                  : QIcon(QString::fromStdString(name)).pixmap(QSize(size, size));
+    return pixmap;
 }
 
 Task::Task(QGraphicsItem *parent, struct zwlr_foreign_toplevel_handle_v1 *handle,
@@ -166,6 +150,7 @@ int itemHeight(void)
 
 QRectF Task::boundingRect() const
 {
+    // TODO: Why is taskWidth() in here??
     return QRectF(0.5 + conf.taskbar_padding.horizontal, 0.5 + conf.taskbar_padding.vertical,
                   m_taskbar->taskWidth() - 1.0 - 2.0 * conf.taskbar_padding.horizontal,
                   itemHeight() - 1.0 - 2.0 * conf.taskbar_padding.vertical);
@@ -343,6 +328,7 @@ int Taskbar::taskWidth(void)
     if (nrItems) {
         width -= conf.taskbar_padding.spacing * (nrItems - 1);
     }
+    // TODO: Fix div by zero
     width /= nrItems;
     if (width > conf.task_maximum_size) {
         width = conf.task_maximum_size;

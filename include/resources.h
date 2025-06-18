@@ -13,3 +13,4 @@ struct sfdo {
 
 void desktopEntryInit(struct sfdo *sfdo);
 void desktopEntryFinish(struct sfdo *sfdo);
+std::string load_icon_from_app_id(struct sfdo *sfdo, const char *app_id, int size, float scale);
