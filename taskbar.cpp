@@ -328,8 +328,9 @@ int Taskbar::taskWidth(void)
     if (nrItems) {
         width -= conf.taskbar_padding.spacing * (nrItems - 1);
     }
-    // TODO: Fix div by zero
-    width /= nrItems;
+    if (nrItems) {
+        width /= nrItems;
+    }
     if (width > conf.task_maximum_size) {
         width = conf.task_maximum_size;
     }
