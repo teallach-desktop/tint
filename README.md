@@ -34,7 +34,7 @@ meson compile -C build
 ## Run
 
 ```
-build/tint -c tintrc
+build/tint -c doc/tintrc
 ```
 
 ## References
