@@ -18,7 +18,7 @@
 #include "log.h"
 #include "item-type.h"
 #include "panel.h"
-#include "taskbar.h"
+#include "plugin-taskbar.h"
 #include "wlr-foreign-toplevel-management-unstable-v1.h"
 
 class Task : public QGraphicsItem

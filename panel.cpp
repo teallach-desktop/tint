@@ -15,7 +15,7 @@
 #include "log.h"
 #include "panel.h"
 #include "plugin-clock.h"
-#include "taskbar.h"
+#include "plugin-taskbar.h"
 
 class BackgroundItem : public QGraphicsItem
 {
