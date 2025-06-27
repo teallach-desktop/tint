@@ -323,15 +323,13 @@ int Taskbar::taskWidth(void)
             ++nrItems;
         }
     }
-    int width = m_scene->width();
+    int width = m_width;
     width -= conf.taskbar_padding.horizontal * 2;
     if (nrItems) {
         width -= conf.taskbar_padding.spacing * (nrItems - 1);
-    }
-    if (nrItems) {
         width /= nrItems;
     }
-    if (width > conf.task_maximum_size) {
+    if (conf.task_maximum_size && width > conf.task_maximum_size) {
         width = conf.task_maximum_size;
     }
     return width;
