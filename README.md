@@ -8,6 +8,8 @@ Pursuing beauty
 
 A panel inspired by tint2
 
+<img src="doc/tint.png"/>
+
 ## Dependencies
 
 - meson, ninja, cmake
