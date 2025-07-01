@@ -27,7 +27,6 @@ private:
     struct wl_display *m_display;
     struct zwlr_foreign_toplevel_manager_v1 *m_foreignToplevelManager;
     struct wl_registry *m_registry;
-    struct wl_seat *m_seat;
     int m_width;
     int m_height;
     QGraphicsScene *m_scene;
