@@ -24,8 +24,7 @@
 class Task : public QGraphicsItem
 {
 public:
-    Task(QGraphicsItem *parent, struct zwlr_foreign_toplevel_handle_v1 *handle,
-         struct wl_seat *seat);
+    Task(QGraphicsItem *parent, struct zwlr_foreign_toplevel_handle_v1 *handle);
     ~Task();
 
     enum { Type = UserType + PANEL_TYPE_TASK };
@@ -43,7 +42,6 @@ protected:
     void hoverLeaveEvent(QGraphicsSceneHoverEvent *) override;
 
 private:
-    struct wl_seat *m_seat;
     struct zwlr_foreign_toplevel_handle_v1 *m_handle;
     uint32_t m_state;
     Taskbar *m_taskbar;
@@ -62,12 +60,10 @@ static QPixmap getIcon(struct sfdo *sfdo, const char *app_id)
     return pixmap;
 }
 
-Task::Task(QGraphicsItem *parent, struct zwlr_foreign_toplevel_handle_v1 *handle,
-           struct wl_seat *seat)
+Task::Task(QGraphicsItem *parent, struct zwlr_foreign_toplevel_handle_v1 *handle)
     : m_state{ 0 }
 {
     m_handle = handle;
-    m_seat = seat;
     m_taskbar = static_cast<Taskbar *>(parent);
     m_hover = false;
 
@@ -206,7 +202,8 @@ void Task::mousePressEvent(QGraphicsSceneMouseEvent *event)
         } else if (m_state & TASK_ACTIVE) {
             zwlr_foreign_toplevel_handle_v1_set_minimized(m_handle);
         } else {
-            zwlr_foreign_toplevel_handle_v1_activate(m_handle, m_seat);
+            auto waylandApp = qGuiApp->nativeInterface<QNativeInterface::QWaylandApplication>();
+            zwlr_foreign_toplevel_handle_v1_activate(m_handle, waylandApp->seat());
         }
     }
 
@@ -238,11 +235,6 @@ Taskbar::Taskbar(QGraphicsScene *scene, int height, int width, struct sfdo *sfdo
     m_width = width;
     m_sfdo = sfdo;
 
-    // Flash up the foreign toplevel interface
-    m_display = static_cast<struct wl_display *>(
-            QGuiApplication::platformNativeInterface()->nativeResourceForIntegration("wl_display"));
-    m_registry = wl_display_get_registry(m_display);
-
     static const wl_registry_listener registry_listener_impl = {
         .global =
                 [](void *data, wl_registry *registry, uint32_t name, const char *interface,
@@ -250,8 +242,6 @@ Taskbar::Taskbar(QGraphicsScene *scene, int height, int width, struct sfdo *sfdo
                     auto self = static_cast<Taskbar *>(data);
                     if (!strcmp(interface, zwlr_foreign_toplevel_manager_v1_interface.name)) {
                         self->addForeignToplevelManager(registry, name, version);
-                    } else if (!strcmp(interface, wl_seat_interface.name)) {
-                        self->addSeat(registry, name, version);
                     }
                 },
         .global_remove =
@@ -260,6 +250,8 @@ Taskbar::Taskbar(QGraphicsScene *scene, int height, int width, struct sfdo *sfdo
                 }
     };
 
+    auto waylandApp = qGuiApp->nativeInterface<QNativeInterface::QWaylandApplication>();
+    m_registry = wl_display_get_registry(waylandApp->display());
     wl_registry_add_listener(m_registry, &registry_listener_impl, this);
 }
 
@@ -269,7 +261,6 @@ Taskbar::~Taskbar()
         zwlr_foreign_toplevel_manager_v1_destroy(m_foreignToplevelManager);
         m_foreignToplevelManager = nullptr;
     }
-    wl_seat_destroy(m_seat);
     wl_registry_destroy(m_registry);
 }
 
@@ -296,7 +287,7 @@ void Taskbar::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget
 
 void Taskbar::addTask(struct zwlr_foreign_toplevel_handle_v1 *handle)
 {
-    m_scene->addItem(new Task(this, handle, m_seat));
+    m_scene->addItem(new Task(this, handle));
     updateTasks();
 }
 
@@ -357,13 +348,4 @@ void Taskbar::addForeignToplevelManager(struct wl_registry *registry, uint32_t n
 
     zwlr_foreign_toplevel_manager_v1_add_listener(m_foreignToplevelManager, &toplevel_manager_impl,
                                                   this);
-}
-
-void Taskbar::addSeat(struct wl_registry *registry, uint32_t name, uint32_t version)
-{
-    version = std::min<uint32_t>(version, wl_seat_interface.version);
-    m_seat = static_cast<struct wl_seat *>(
-            wl_registry_bind(registry, name, &wl_seat_interface, version));
-    if (!m_seat)
-        die("no wl_seat");
 }
