@@ -65,3 +65,6 @@ executable(
   include_directories: [incs],
   dependencies: deps,
 )
+
+subdir('doc')
+
