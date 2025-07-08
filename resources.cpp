@@ -1,11 +1,15 @@
 // SPDX-License-Identifier: GPL-2.0-only
 #include <cstring>
 #include <cmath>
+#include "conf.h"
 #include "log.h"
 #include "resources.h"
 
 static void log_handler(enum sfdo_log_level level, const char *fmt, va_list args, void *tag)
 {
+    if (!conf.verbosity)
+        return;
+
     char buf[256];
     if (snprintf(buf, sizeof(buf), "[%s] %s", (const char *)tag, fmt) < (int)sizeof(buf)) {
         fmt = buf;

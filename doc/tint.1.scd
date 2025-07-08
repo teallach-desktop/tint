@@ -27,6 +27,8 @@ Features:
 	Displays help, including generic Qt options
 *-v|--version*
 	Displays version information
+*-d|--debug*
+	Enable full logging, including debug information
 *-o|--output <output>*
 	Specify output (monitor)
 *-c|--config <filename>*

@@ -52,12 +52,15 @@ struct conf {
     QFont time1_font;
     QColor clock_font_color;
 
-    /* General */
+    /* General (not set by config file) */
     QString output;
     double penWidth;
+    int verbosity;
+
 };
 
 extern conf conf;
 
 void confInit(QString filename);
 void confSetOutput(QString output);
+void confSetVerbosity(int verbosity);

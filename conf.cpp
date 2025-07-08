@@ -176,6 +176,7 @@ void confInit(QString filename)
 
     // Temporary global settings
     conf.penWidth = 1.0;
+    conf.verbosity = 0;
 
     // background_id 0 refers to a special background which is fully transparent
     conf.backgrounds.push_back(std::make_unique<Background>());
@@ -188,4 +189,9 @@ void confInit(QString filename)
 void confSetOutput(QString output)
 {
     conf.output = output;
+}
+
+void confSetVerbosity(int verbosity)
+{
+    conf.verbosity = verbosity;
 }
