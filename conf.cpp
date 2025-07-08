@@ -151,7 +151,7 @@ static void parse(std::string filename)
     std::ifstream file(filename);
     std::string line;
     if (!file.is_open())
-        die("cannot open file '{}'", filename);
+        warn("cannot open file '{}'", filename);
     while (std::getline(file, line))
         process_line(line);
     file.close();
