@@ -146,7 +146,6 @@ int itemHeight(void)
 
 QRectF Task::boundingRect() const
 {
-    // TODO: Why is taskWidth() in here??
     return QRectF(0.5 + conf.taskbar_padding.horizontal, 0.5 + conf.taskbar_padding.vertical,
                   m_taskbar->taskWidth() - 1.0 - 2.0 * conf.taskbar_padding.horizontal,
                   itemHeight() - 1.0 - 2.0 * conf.taskbar_padding.vertical);
@@ -158,15 +157,19 @@ void Task::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *)
     pen.setStyle(Qt::SolidLine);
     pen.setWidth(conf.penWidth);
 
+    int radius = 0;
     if (m_state & TASK_ACTIVE) {
         painter->setPen(pen);
         painter->setBrush(conf.backgrounds.at(conf.task_active_background_id)->background_color);
+        radius = conf.backgrounds.at(conf.task_active_background_id)->rounded;
     } else {
         painter->setPen(m_hover ? pen : Qt::NoPen);
         painter->setBrush(conf.backgrounds.at(conf.task_background_id)->background_color);
+        radius = conf.backgrounds.at(conf.task_background_id)->rounded;
     }
+
     QPainterPath path;
-    path.addRoundedRect(boundingRect(), 4, 4);
+    path.addRoundedRect(boundingRect(), radius, radius);
     painter->drawPath(path);
 
     // Icon
