@@ -220,9 +220,43 @@ Panel::Panel(QWidget *parent) : QMainWindow(parent)
     show();
 
     resize(screenGeometry.width(), conf.panel_height);
+
+    connect(qApp, &QApplication::screenAdded, this, &Panel::updateGeometryDelayed);
 }
 
 Panel::~Panel()
 {
     desktopEntryFinish(&m_sfdo);
+}
+
+void Panel::updateGeometryDelayed()
+{
+    m_timer.setInterval(500);
+    m_timer.setSingleShot(true);
+    connect(&m_timer, &QTimer::timeout, this, &Panel::updateGeometry);
+    m_timer.start();
+}
+
+void Panel::updateGeometry()
+{
+    qDebug() << "updateGeometry";
+    QScreen *screen = QApplication::primaryScreen();
+    QRect screenGeometry = screen->geometry();
+    QString outputName;
+    for (QScreen *s : screen->virtualSiblings()) {
+        outputName = s->name();
+        screenGeometry = s->geometry();
+        if (outputName == conf.output) {
+            break;
+        }
+    }
+
+    // No output is connected. Qt just creates a dummy one with no name.
+    if (outputName == "")
+        return;
+
+    info("use output '{}'", outputName.toStdString());
+    hide();
+    show();
+    resize(screenGeometry.width(), conf.panel_height);
 }
