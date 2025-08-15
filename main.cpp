@@ -1,15 +1,27 @@
 // SPDX-License-Identifier: GPL-2.0-only
+#include <signal.h>
 #include <QApplication>
 #include <QCommandLineParser>
 #include "log.h"
 #include "conf.h"
 #include "panel.h"
 
+void handleQuitSignals(const std::vector<int> &quitSignals)
+{
+    auto handler = [](int sig) -> void {
+        Q_UNUSED(sig);
+        QCoreApplication::quit();
+    };
+    for (int sig : quitSignals)
+        signal(sig, handler);
+}
+
 int main(int argc, char **argv)
 {
     QApplication app(argc, argv);
     QApplication::setApplicationName("tint");
     QApplication::setApplicationVersion("0.0.0");
+    handleQuitSignals({ SIGQUIT, SIGINT, SIGTERM, SIGHUP });
 
     QCommandLineParser parser;
     parser.setApplicationDescription("A Wayland panel inspired by tint2");
