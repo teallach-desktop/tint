@@ -13,10 +13,9 @@ Pursuing beauty
 
 - meson, ninja, cmake
 - qt6-base, qt6-wayland
-- [layer-shell-qt], [wlr-protocols], [libsfdo]
+- [layer-shell-qt], [libsfdo]
 
 [layer-shell-qt]: https://invent.kde.org/plasma/layer-shell-qt
-[wlr-protocols]: https://gitlab.freedesktop.org/wlroots/wlr-protocols
 [libsfdo]: https://gitlab.freedesktop.org/vyivel/libsfdo
 
 # Build
@@ -45,6 +44,6 @@ build/tint -c doc/tintrc
 # Arch Linux
 
 ```bash
-sudo pacman -S layer-shell-qt wlr-protocols libsfdo
+sudo pacman -S layer-shell-qt libsfdo
 ```
 
