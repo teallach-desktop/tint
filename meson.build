@@ -61,6 +61,7 @@ executable(
   srcs,
   include_directories: [incs],
   dependencies: deps,
+  install: true,
 )
 
 subdir('doc')
