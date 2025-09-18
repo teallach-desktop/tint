@@ -192,8 +192,7 @@ void Task::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *)
 
 void Task::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
 {
-    /* TODO: just temporarily to get ASAN output */
-    QCoreApplication::quit();
+    // No-op
 }
 
 void Task::mousePressEvent(QGraphicsSceneMouseEvent *event)
