@@ -168,14 +168,11 @@ Panel::Panel(QWidget *parent) : QMainWindow(parent)
     layerShell->setLayer(LayerShellQt::Window::Layer(layer.keyToValue("LayerTop")));
 
     // Panel position
-    const QString panelAnchors = "AnchorBottom|AnchorLeft|AnchorRight";
-    const auto anchorEnums = QMetaEnum::fromType<LayerShellQt::Window::Anchor>();
-    uint32_t anchors = 0;
-    const auto stringList = panelAnchors.split(QLatin1Char('|'));
-    for (const auto &value : stringList) {
-        anchors |= anchorEnums.keyToValue(qPrintable(value));
-    }
-    layerShell->setAnchors((LayerShellQt::Window::Anchors)anchors);
+    LayerShellQt::Window::Anchors anchors;
+    anchors.setFlag(LayerShellQt::Window::AnchorLeft);
+    anchors.setFlag(LayerShellQt::Window::AnchorBottom);
+    anchors.setFlag(LayerShellQt::Window::AnchorRight);
+    layerShell->setAnchors(anchors);
 
     const auto interactivity = QMetaEnum::fromType<LayerShellQt::Window::KeyboardInteractivity>();
     layerShell->setKeyboardInteractivity(LayerShellQt::Window::KeyboardInteractivity(
