@@ -21,7 +21,7 @@ Background::~Background(void) { };
 
 static int current_background_index = 0;
 
-static std::vector<std::string> split(std::string s, char delim)
+static std::vector<std::string> split(const std::string &s, char delim)
 {
     auto has_content = [](auto const &s) { return s.size() > 0; };
     auto parts = s | std::views::split(delim) | std::views::filter(has_content)
@@ -79,15 +79,15 @@ uint32_t getBackgroundId(std::string value)
     return id;
 }
 
-static void process_line(std::string line)
+static void process_line(const std::string &line)
 {
-    auto parts = line | std::views::split('=') | std::ranges::to<std::vector<std::string>>();
-    if (parts.size() < 2) {
+    auto hunks = line | std::views::split('=') | std::ranges::to<std::vector<std::string>>();
+    if (hunks.size() < 2) {
         return;
     }
 
-    auto key = trim(parts[0]);
-    auto value = trim(parts[1]);
+    auto key = trim(hunks[0]);
+    auto value = trim(hunks[1]);
 
     // Panel
     if (key == "panel_items") {
