@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-only
 #include <cstring>
 #include <cmath>
+#include <QIcon>
 #include "conf.h"
 #include "log.h"
 #include "resources.h"
@@ -38,7 +39,11 @@ void desktopEntryInit(struct sfdo *sfdo)
         die("sfdo_desktop_db_load()");
     int load_options = SFDO_ICON_THEME_LOAD_OPTIONS_DEFAULT
             | SFDO_ICON_THEME_LOAD_OPTION_ALLOW_MISSING | SFDO_ICON_THEME_LOAD_OPTION_RELAXED;
-    sfdo->icon_theme = sfdo_icon_theme_load(sfdo->icon_ctx, "Papirus", load_options);
+
+    std::string theme = QIcon::themeName().toStdString();
+    info("use icon theme '{}'", theme);
+    sfdo->icon_theme = sfdo_icon_theme_load(sfdo->icon_ctx, theme.data(), load_options);
+
     if (!sfdo->icon_theme)
         die("sfdo_icon_theme_load()");
     sfdo_basedir_ctx_destroy(basedir_ctx);
